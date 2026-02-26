@@ -1,0 +1,131 @@
+# 🎙️ Standup Mediator — `features/standup-mediator`
+
+> An AI-powered daily standup facilitator for [skarya.ai](https://skarya.ai).  
+> Extends **Kobi** (skarya's AI assistant) to run standups conversationally and automatically update project boards, timesheets, and task statuses — with zero manual effort.
+
+---
+
+## 🗂️ What's in This Repo
+
+```
+standup-mediator/
+├── docs/
+│   ├── PRD.md              # Product Requirements Document
+│   ├── TDD.md              # Technical Design Doc (Phase 1 deliverable)
+│   ├── ARCHITECTURE.md     # System architecture (Phase 1 deliverable)
+│   └── API.md              # Internal API contracts (Phase 1 deliverable)
+├── src/
+│   ├── engine/             # Mediator conversation engine
+│   ├── nlp/                # NLP / intent parser
+│   ├── integrations/       # skarya.ai API write-back layer
+│   ├── channels/           # Channel adapters (chat, voice, slack, teams)
+│   ├── summary/            # Team standup summary generator
+│   └── types/              # Shared TypeScript types
+├── tests/
+│   ├── unit/
+│   ├── integration/
+│   └── fixtures/           # Mock standup transcripts for testing
+└── package.json
+```
+
+---
+
+## 🚀 Feature Overview
+
+The Standup Mediator asks each team member three questions every morning:
+
+| # | Question | What happens with the answer |
+|---|----------|------------------------------|
+| Q1 | What did you work on yesterday? | Marks tasks as Done / In Progress in skarya.ai |
+| Q2 | What are you working on today? | Updates Kanban board, logs to timesheet |
+| Q3 | Any blockers? | Creates a Blocked flag, notifies the team lead |
+
+After all members have responded, a **team standup summary** is delivered to the team lead in the skarya.ai dashboard.
+
+---
+
+## 🔌 Supported Channels
+
+- **In-App Chat** — skarya.ai web & mobile (Phase 1)
+- **Voice** — phone/VOIP bot (Phase 2)
+- **Slack** — DM-based standup bot (Phase 2)
+- **Microsoft Teams** — DM-based standup bot (Phase 2)
+- **Async Mode** — submit your standup anytime before 11am (Phase 1)
+
+---
+
+## 📦 Tech Stack (Planned)
+
+> ⚠️ This section will be filled in during Phase 1 Technical Design
+
+- **Language**: TypeScript
+- **NLP**: TBD (candidates: OpenAI function calling, fine-tuned classifier, spaCy)
+- **Voice**: TBD (candidates: Twilio Voice + Deepgram, or Vapi)
+- **Integration**: skarya.ai internal REST API
+- **Channel adapters**: Bolt (Slack), Bot Framework (Teams)
+- **Testing**: Vitest + Playwright
+
+---
+
+## 📋 Current Status
+
+| Phase | Name | Status |
+|-------|------|--------|
+| Phase 0 | Discovery & Design | ✅ In Progress |
+| Phase 1 | MVP — Chat Mode | 🔲 Not Started |
+| Phase 2 | Voice + Async + Slack | 🔲 Not Started |
+| Phase 3 | Customer Rollout | 🔲 Not Started |
+| Phase 4 | Advanced Intelligence | 🔲 Not Started |
+
+---
+
+## 📄 Key Documents
+
+- [PRD — Product Requirements Document](./docs/PRD.md) ← Start here
+- [TDD — Technical Design](./docs/TDD.md) ← Phase 1
+- [Architecture Overview](./docs/ARCHITECTURE.md) ← Phase 1
+- [API Contracts](./docs/API.md) ← Phase 1
+
+---
+
+## 🏗️ Local Development Setup
+
+> ⚠️ Setup instructions will be added when Phase 1 development begins.
+
+```bash
+# Clone the repo
+git clone https://github.com/skarya-ai/skarya-ai.git
+cd skarya-ai/features/standup-mediator
+
+# Install dependencies
+npm install
+
+# Run tests
+npm test
+
+# Run in dev mode
+npm run dev
+```
+
+---
+
+## 🤝 Contributing
+
+1. Check the open issues and pick one tagged `standup-mediator`
+2. Branch off `main` using the convention: `feat/standup-mediator/<description>`
+3. Write tests for your changes
+4. Open a PR and tag `@product-team` for review
+
+---
+
+## 📬 Contacts
+
+| Role | Name |
+|------|------|
+| Product Owner | TBD |
+| Tech Lead | TBD |
+| Design Lead | TBD |
+
+---
+
+*Part of the [skarya.ai](https://skarya.ai) platform — AI-Powered Work Management. Free beta until March 2026.*
