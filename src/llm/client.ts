@@ -2,7 +2,7 @@ import Groq from 'groq-sdk';
 import { StandupOutput } from '@/types';
 
 const groq = new Groq({
-    apiKey: process.env.GROQ_API_KEY,
+    apiKey: process.env.GROQ_API_KEY || 'dummy_key',
 });
 
 export const LLM_MODEL = process.env.GROQ_MODEL || 'llama3-70b-8192';

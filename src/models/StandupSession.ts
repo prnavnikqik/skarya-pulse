@@ -46,8 +46,9 @@ const StandupSessionSchema = new Schema({
 // Ensure virtuals are included when converting to JSON
 StandupSessionSchema.set('toJSON', {
     virtuals: true,
-    transform: (doc, ret) => {
-        ret.id = ret._id.toString();
+    transform: (doc: any, ret: any) => {
+        // @ts-ignore
+        ret.id = ret._id?.toString() || '';
         delete ret._id;
         delete ret.__v;
         return ret;
@@ -55,7 +56,7 @@ StandupSessionSchema.set('toJSON', {
 });
 
 // Update the updatedAt timestamp before saving
-StandupSessionSchema.pre('save', function (next) {
+StandupSessionSchema.pre('save', function (next: any) {
     this.updatedAt = new Date().toISOString();
     next();
 });
