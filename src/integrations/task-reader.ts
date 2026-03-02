@@ -16,8 +16,8 @@ export class TaskReader {
     ): Promise<TaskWithSubtasks[]> {
         console.log(`[TaskReader] Fetching tasks for ${userEmail} in board ${boardId}`);
 
-        // We use the specific filtered assignee endpoint based on the staging schema discovery
-        const response = await skaryaClient.get<any>('/api/boardTask/getFilteredAssignee', {
+        // We use the general board task endpoint to avoid 500 errors from strict filtered assignments
+        const response = await skaryaClient.get<any>('/api/boardTask/getBoardTask', {
             boardId,
             workspaceId
         });
