@@ -56,9 +56,8 @@ StandupSessionSchema.set('toJSON', {
 });
 
 // Update the updatedAt timestamp before saving
-StandupSessionSchema.pre('save', function (next: any) {
+StandupSessionSchema.pre('save', function () {
     this.updatedAt = new Date().toISOString();
-    next();
 });
 
 export const StandupSession = mongoose.models.StandupSession || mongoose.model<StandupSessionDocument>('StandupSession', StandupSessionSchema);

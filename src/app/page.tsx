@@ -7,8 +7,8 @@ import { StandupOutput } from '@/types';
 
 // Hardcoded for demo
 const TEST_USER = {
-  workspaceId: '692ba14ce2552a8b5afe6e9a',
-  boardId: '694a87f7e6aa80a347e86e5a',
+  workspaceId: '69a202afcf1d73e568280529',
+  boardId: '69a2118ecf1d73e568280ba5',
   userEmail: 'pranav.patil@nikqik.com',
   userName: 'Pranav Patil'
 };
