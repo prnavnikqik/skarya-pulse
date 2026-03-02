@@ -1,0 +1,434 @@
+{
+  "apiCalls": [
+    {
+      "url": "https://pulse.karyaa.ai/api/auth/checkSubdomain?subdomain=pulse",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/auth/session",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/auth/providers",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/auth/csrf",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/auth/callback/credentials",
+      "method": "POST"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/auth/session",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/auth/csrf",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/auth/session",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/auth/getAgents?accountId=null&subdomain=pulse",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/calendar/tokens",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/auth/getAgents?accountId=null&subdomain=pulse",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/role-permission",
+      "method": "POST"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/user/theme",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/role-permission",
+      "method": "POST"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/emailNotification/notifications?subdomainName=&accountId=6271&email=pranav.patil%40nikqik.com",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/workspace/checkOnboarding?workspaceId=69a202afcf1d73e568280529",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/user/theme",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/dashboard/dailyChecklist?workspaceId=69a202afcf1d73e568280529",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/dashboard/filterBoardandProject?workspaceId=69a202afcf1d73e568280529",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/role-permission",
+      "method": "POST"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/dashboard/tasks?workspaceId=69a202afcf1d73e568280529&tzOffsetMinutes=-330",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/dashboard/projects?workspaceId=69a202afcf1d73e568280529",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/dashboard/boards?workspaceId=69a202afcf1d73e568280529",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/dashboard/activity?workspaceId=69a202afcf1d73e568280529&limit=20",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/dashboard/myCreatedTasks?workspaceId=69a202afcf1d73e568280529",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/dashboard/myAssignedTasks?workspaceId=69a202afcf1d73e568280529",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/client?workspaceId=69a202afcf1d73e568280529&status=active",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/tour/getTourProgress?userId=69a202afcf1d73e56828052c&accountId=6271&subdomain=pulse&email=pranav.patil%40nikqik.com",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/dashboard/dailyChecklist",
+      "method": "PUT"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/layout/getPinnedProjects?workspaceId=69a202afcf1d73e568280529&accountId=6271",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/layout/getPinnedBoard?workspaceId=69a202afcf1d73e568280529&accountId=6271",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/layout/getPinnedProjects?workspaceId=69a202afcf1d73e568280529&accountId=6271",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/layout/getPinnedBoard?workspaceId=69a202afcf1d73e568280529&accountId=6271",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/auth/csrf",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/user/theme",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/role-permission",
+      "method": "POST"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/emailNotification/notifications?subdomainName=&accountId=6271&email=pranav.patil%40nikqik.com",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/workspace/checkOnboarding?workspaceId=69a202afcf1d73e568280529",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/tour/getTourProgress?userId=69a202afcf1d73e56828052c&accountId=6271&subdomain=pulse&email=pranav.patil%40nikqik.com",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/role-permission",
+      "method": "POST"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/boards/getBoardByUser?workspaceId=69a202afcf1d73e568280529&email=pranav.patil@nikqik.com&subdomain=pulse&workspaceName=Standups&accountId=6271",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/user/theme",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/role-permission",
+      "method": "POST"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/auth/getAgents?accountId=6271&subdomain=pulse",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/role-permission",
+      "method": "POST"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/calendar/tokens",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/role-permission",
+      "method": "POST"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/auth/getAgents?accountId=6271&subdomain=pulse",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/client?workspaceId=69a202afcf1d73e568280529&status=active",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/role-permission",
+      "method": "POST"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/layout/getPinnedBoard?workspaceId=69a202afcf1d73e568280529&accountId=6271",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/tour/getTourProgress?userId=69a202afcf1d73e56828052c&accountId=6271&subdomain=pulse&email=pranav.patil%40nikqik.com",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/auth/csrf",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/user/theme",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/role-permission",
+      "method": "POST"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/boards/board?id=69a2118ecf1d73e568280ba5",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/emailNotification/notifications?subdomainName=&accountId=6271&email=pranav.patil%40nikqik.com",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/workspace/checkOnboarding?workspaceId=69a202afcf1d73e568280529",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/boards/getBoardById&Access?id=69a2118ecf1d73e568280ba5&email=pranav.patil@nikqik.com",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/role-permission",
+      "method": "POST"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/user/theme",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/role-permission",
+      "method": "POST"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/auth/getAgents?accountId=6271&subdomain=pulse",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/role-permission",
+      "method": "POST"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/calendar/tokens",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/role-permission",
+      "method": "POST"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/auth/getAgents?accountId=6271&subdomain=pulse",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/client?workspaceId=69a202afcf1d73e568280529&status=active",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/role-permission",
+      "method": "POST"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/boards/getBoardById&Access?id=69a2118ecf1d73e568280ba5&email=pranav.patil@nikqik.com",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/boardTaskDefaultFieldVisibility/getOrCreateVisibility?accountId=6271&workspaceId=69a202afcf1d73e568280529&subdomain=pulse&boardId=69a2118ecf1d73e568280ba5",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/linkes/getBoardLinkes?workspaceId=69a202afcf1d73e568280529&accountId=6271&subdomain=pulse&boardId=69a2118ecf1d73e568280ba5",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/boardTaskDefaultFieldVisibility/getOrCreateVisibility?accountId=6271&workspaceId=69a202afcf1d73e568280529&subdomain=pulse&boardId=69a2118ecf1d73e568280ba5",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/boardTaskCustomField/getBoardTaskCustomField?workspaceId=69a202afcf1d73e568280529&boardId=69a2118ecf1d73e568280ba5",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/boardTaskStatus/getOrCreateBoardTaskStatus?boardId=69a2118ecf1d73e568280ba5&workspaceId=69a202afcf1d73e568280529",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/role-permission",
+      "method": "POST"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/boardTask/getKanbanInitData?boardId=69a2118ecf1d73e568280ba5&workspaceId=69a202afcf1d73e568280529&includeTasks=false",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/boardTaskCustomField/getBoardTaskCustomField?workspaceId=69a202afcf1d73e568280529&boardId=69a2118ecf1d73e568280ba5",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/boardTask/getAllStatPrioLabTyp?workspaceId=69a202afcf1d73e568280529&boardId=69a2118ecf1d73e568280ba5&createdBy=pranav.patil%40nikqik.com",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/boards/getFilterBoard?boardId=69a2118ecf1d73e568280ba5&workspaceId=69a202afcf1d73e568280529",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/tour/getTourProgress?userId=69a202afcf1d73e56828052c&accountId=6271&subdomain=pulse&email=pranav.patil%40nikqik.com",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/boardTaskDefaultFieldVisibility/getOrCreateVisibility?accountId=6271&workspaceId=69a202afcf1d73e568280529&subdomain=pulse&boardId=69a2118ecf1d73e568280ba5",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/boardTaskCustomField/getBoardTaskCustomField?workspaceId=69a202afcf1d73e568280529&boardId=69a2118ecf1d73e568280ba5",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/boards/getBoardById&Access?id=69a2118ecf1d73e568280ba5&email=pranav.patil@nikqik.com",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/boards/getBoardById&Access?id=69a2118ecf1d73e568280ba5&email=pranav.patil@nikqik.com",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/tour/getTourProgress?userId=69a202afcf1d73e56828052c&accountId=6271&subdomain=pulse&email=pranav.patil%40nikqik.com",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/tour/getTourProgress?userId=69a202afcf1d73e56828052c&accountId=6271&subdomain=pulse&email=pranav.patil%40nikqik.com",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/tour/getTourProgress?userId=69a202afcf1d73e56828052c&accountId=6271&subdomain=pulse&email=pranav.patil%40nikqik.com",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/boardTaskStatus/getStatus?boardId=69a2118ecf1d73e568280ba5&workspaceId=69a202afcf1d73e568280529",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/boardTaskPriority/getOrCreateNameColor?boardId=69a2118ecf1d73e568280ba5&workspaceId=69a202afcf1d73e568280529",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/boardTaskLabel/getOrCreateDefaultNameColor?boardId=69a2118ecf1d73e568280ba5&workspaceId=69a202afcf1d73e568280529",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/boardTaskType/getOrDefaultName&ColorType?workspaceId=69a202afcf1d73e568280529&boardId=69a2118ecf1d73e568280ba5",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/boardTask/getFilteredAssignee?workspaceId=69a202afcf1d73e568280529&boardId=69a2118ecf1d73e568280ba5",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/tour/getTourProgress?userId=69a202afcf1d73e56828052c&accountId=6271&subdomain=pulse&email=pranav.patil%40nikqik.com",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/boardTask/getKanbanTasksPaginated?boardId=69a2118ecf1d73e568280ba5&workspaceId=69a202afcf1d73e568280529&status=Inbox&page=1&limit=50&showCompletedTasks=false&sortBy=order&sortOrder=asc",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/boardTask/getKanbanTasksPaginated?boardId=69a2118ecf1d73e568280ba5&workspaceId=69a202afcf1d73e568280529&status=Backlog&page=1&limit=50&showCompletedTasks=false&sortBy=order&sortOrder=asc",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/boardTask/getKanbanTasksPaginated?boardId=69a2118ecf1d73e568280ba5&workspaceId=69a202afcf1d73e568280529&status=To+Do&page=1&limit=50&showCompletedTasks=false&sortBy=order&sortOrder=asc",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/boardTask/getKanbanTasksPaginated?boardId=69a2118ecf1d73e568280ba5&workspaceId=69a202afcf1d73e568280529&status=In+Progress&page=1&limit=50&showCompletedTasks=false&sortBy=order&sortOrder=asc",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/boardTask/getKanbanTasksPaginated?boardId=69a2118ecf1d73e568280ba5&workspaceId=69a202afcf1d73e568280529&status=Blocked&page=1&limit=50&showCompletedTasks=false&sortBy=order&sortOrder=asc",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/boardTask/getKanbanTasksPaginated?boardId=69a2118ecf1d73e568280ba5&workspaceId=69a202afcf1d73e568280529&status=Done&page=1&limit=50&showCompletedTasks=false&sortBy=order&sortOrder=asc",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/role-permission",
+      "method": "POST"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/boardTask/getTaskInitData?workspaceId=69a202afcf1d73e568280529&boardId=69a2118ecf1d73e568280ba5",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/boardTask/createBoardTask?boardId=69a2118ecf1d73e568280ba5&workspaceId=69a202afcf1d73e568280529",
+      "method": "POST"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/boards/getBoardById&Access?id=69a2118ecf1d73e568280ba5&email=pranav.patil@nikqik.com",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/boardTask/getBoardTask?boardId=69a2118ecf1d73e568280ba5&workspaceId=69a202afcf1d73e568280529",
+      "method": "GET"
+    },
+    {
+      "url": "https://pulse.karyaa.ai/api/tour/getTourProgress?userId=69a202afcf1d73e56828052c&accountId=6271&subdomain=pulse&email=pranav.patil%40nikqik.com",
+      "method": "GET"
+    }
+  ],
+  "workspaceId": "69a202afcf1d73e568280529",
+  "boardId": "69a2118ecf1d73e568280ba5",
+  "createTaskEndpoint": "https://pulse.karyaa.ai/api/boardTask/createBoardTask?boardId=69a2118ecf1d73e568280ba5&workspaceId=69a202afcf1d73e568280529",
+  "sampleCreatePayload": "{\"name\":\"hi\",\"description\":\"\",\"assigneePrimary\":\"\",\"assigneeGroup\":null,\"collaborators\":[],\"startDate\":\"2026-03-01T14:18:59.797Z\",\"dueDate\":\"2026-03-02T14:18:59.797Z\",\"status\":\"Backlog\",\"priority\":\"\",\"label\":\"\",\"actualEffort\":\"\",\"allocatedEffort\":\"\",\"dealValue\":0,\"relation\":[],\"dependency\":[],\"milestone\":false,\"percentageCompletion\":0,\"taskNumber\":\"123\",\"customFieldValues\":{},\"checklists\":[],\"type\":\"User Story\",\"recurrence\":{\"enabled\":false,\"frequency\":\"weekly\",\"interval\":1,\"endType\":\"never\",\"endAfter\":10,\"endOn\":\"2027-03-01T14:18:59.797Z\",\"weekDays\":[],\"monthDay\":1,\"yearMonth\":1,\"customPattern\":\"\"},\"createdBy\":\"pranav.patil@nikqik.com\",\"statusCategory\":\"not_started\"}",
+  "statuses": null,
+  "priorities": null
+}

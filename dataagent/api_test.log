@@ -1,0 +1,5 @@
+POST https://pulse.karyaa.ai/api/boardTask/updateBoardTask => 405
+PUT https://pulse.karyaa.ai/api/boardTask/updateBoardTask => 400
+PATCH https://pulse.karyaa.ai/api/boardTask/updateBoardTask => 405
+POST https://pulse.karyaa.ai/api/boardTask/updateTask => 404
+PUT https://pulse.karyaa.ai/api/boardTask/updateTask => 404
