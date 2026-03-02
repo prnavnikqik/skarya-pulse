@@ -101,7 +101,7 @@ export default function Home() {
     <main className="min-h-screen bg-gray-50 flex flex-col items-center">
       <header className="w-full bg-white shadow-sm border-b py-4 px-6 flex items-center justify-between">
         <h1 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-          <span>🎙️</span> Standup Mediator
+          <span>💓</span> Skarya Pulse
         </h1>
         <div className="text-sm text-gray-500">
           Demo User: {TEST_USER.userName}
@@ -111,16 +111,16 @@ export default function Home() {
       <div className="flex-1 w-full max-w-4xl p-6 flex flex-col items-center justify-center">
         {!sessionId ? (
           <div className="text-center space-y-6">
-            <h2 className="text-3xl font-semibold text-gray-800">Ready for your daily standup?</h2>
+            <h2 className="text-3xl font-semibold text-gray-800">Ready for your daily Pulse check?</h2>
             <p className="text-gray-500 max-w-md mx-auto">
-              Skip the sync meeting. Tell Kobi what you did, what you are doing, and if you are blocked. We'll update your tasks automatically.
+              Skip the sync meeting. Tell Pulse what you did, what you are doing, and if you are blocked. We'll update your tasks automatically.
             </p>
             <button
               onClick={startStandup}
               disabled={isStarting}
               className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-full font-medium transition-all shadow-md disabled:opacity-50"
             >
-              {isStarting ? 'Connecting to skarya.ai...' : 'Start My Standup'}
+              {isStarting ? 'Connecting to skarya.ai...' : 'Start My Pulse Check'}
             </button>
           </div>
         ) : isConfirmed ? (

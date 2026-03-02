@@ -1,4 +1,4 @@
-// @ts-nocheck
+// 
 export const dynamic = 'force-dynamic';
 import { groq } from '@ai-sdk/groq';
 import { streamText, tool } from 'ai';
@@ -33,26 +33,27 @@ When interacting with a user:
       get_user_tasks: tool({
         description: 'Fetch all tasks assigned to the current user in the active board. Call this whenever the user asks about their own tasks, what they should do today, or asks for a summary of their work.',
         parameters: z.object({}),
-        execute: async () => {
+        // @ts-ignore
+        execute: async (_args) => {
           try {
             const tasks = await TaskReader.fetchUserTasks(boardId, workspaceId, userEmail);
             return {
               success: true,
               message: `Found ${tasks.length} tasks.`,
               tasks: tasks.map(t => ({
-                id: t._id,
-                taskNumber: t.taskNumber,
-                name: t.name,
-                status: t.status,
-                percentageCompletion: t.percentageCompletion,
+                id: String(t._id),
+                taskNumber: String(t.taskNumber),
+                name: String(t.name),
+                status: String(t.status),
+                percentageCompletion: Number(t.percentageCompletion),
                 subtasks: t.subtasks?.map(s => (`${s.subtaskNumber}: ${s.name} (${s.status})`)) || []
               }))
             };
-          } catch (error: any) {
-            return { success: false, error: error.message };
+          } catch (error: Error | unknown) {
+            return { success: false, error: error instanceof Error ? error.message : String(error) };
           }
         },
-      }),
+      } as any),
 
       create_task: tool({
         description: 'Create a new task on the board. Use this when the user explicitly asks to create a task.',
@@ -65,7 +66,7 @@ When interacting with a user:
         // Notice we do NOT implement 'execute' here!
         // By omitting 'execute', we force the tool call to be returned to the client.
         // The client will display a Confirmation Card, and then supply the tool result once confirmed.
-      }),
+      } as any),
 
       update_task_status: tool({
         description: 'Update the status or completion percentage of an existing task.',
@@ -77,7 +78,7 @@ When interacting with a user:
           percentageCompletion: z.number().describe('0 to 100 percentage. Set to 100 if completed, 50 if halfway, etc.')
         }),
         // Omit execute to ask for confirmation from the client
-      }),
+      } as any),
 
       add_task_comment: tool({
         description: 'Add a comment to an existing task.',
@@ -87,7 +88,7 @@ When interacting with a user:
           comment: z.string().describe('The text to post as a comment')
         }),
         // Omit execute to ask for confirmation
-      })
+      } as any)
     },
     maxSteps: 3, // Allow the AI to call a tool, get the result, and then respond to the user
   } as any);

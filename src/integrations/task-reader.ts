@@ -27,10 +27,11 @@ export class TaskReader {
             throw new Error(`Failed to fetch tasks: ${response.message || 'Unknown error'}`);
         }
 
-        const allTasks = response.data;
+        // The real API returns data.tasks array inside the data object
+        const allTasks: SkaryaTask[] = (response.data as any)?.tasks || [];
 
         // Filter tasks logically based on assignee or collaborators
-        const userTasks = allTasks.filter(task => {
+        const userTasks = allTasks.filter((task: any) => {
             const isAssignee = task.assigneePrimary?.email === userEmail;
             const isCollaborator = task.collaborators?.includes(userEmail);
             return isAssignee || isCollaborator;

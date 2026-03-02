@@ -6,8 +6,8 @@ import { executeSkaryaAction } from '@/app/actions';
 
 // Hardcoded for demo
 const TEST_USER = {
-  workspaceId: '692ba14ce2552a8b5afe6e9a',
-  boardId: '694a87f7e6aa80a347e86e5a',
+  workspaceId: '69a202afcf1d73e568280529',
+  boardId: '69a2118ecf1d73e568280ba5',
   userEmail: 'pranav.patil@nikqik.com',
   userName: 'Pranav Patil'
 };
@@ -37,7 +37,7 @@ export default function BrainPage() {
     <main className="min-h-screen bg-gray-50 flex flex-col items-center">
       <header className="w-full bg-white shadow-sm border-b py-4 px-6 flex items-center justify-between">
         <h1 className="text-xl font-bold text-indigo-900 flex items-center gap-2">
-          <span>🧠</span> Skarya Brain
+          <span>🧠</span> Skarya Pulse: Brain
         </h1>
         <div className="text-sm text-gray-500">
           Demo User: {TEST_USER.userName}
@@ -164,7 +164,7 @@ export default function BrainPage() {
               value={input}
               onChange={handleInputChange}
               disabled={isLoading}
-              placeholder="Ask Skarya Brain..."
+              placeholder="Ask Skarya Pulse..."
               className="flex-1 px-5 py-3 bg-white border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all shadow-sm"
             />
             <button

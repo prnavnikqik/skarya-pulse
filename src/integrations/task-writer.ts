@@ -85,8 +85,48 @@ export class TaskWriter {
 
     private static async createTask(task: NewTask): Promise<WritebackResult> {
         try {
-            // Inferred endpoint
-            const response = await skaryaClient.post(`/api/boardTask/createBoardTask`, task);
+            // Extracted from pulse.karyaa.ai dataagent schema
+            const endpoint = `/api/boardTask/createBoardTask?boardId=${task.boardId}&workspaceId=${task.workspaceId}`;
+
+            const payload = {
+                name: task.name,
+                description: '',
+                assigneePrimary: task.assigneeEmail,
+                assigneeGroup: null,
+                collaborators: [],
+                startDate: new Date().toISOString(),
+                dueDate: new Date(Date.now() + 86400000 * 7).toISOString(), // +7 days
+                status: task.status || 'To Do',
+                priority: task.priority || 'Medium',
+                label: '',
+                actualEffort: '',
+                allocatedEffort: '',
+                dealValue: 0,
+                relation: [],
+                dependency: [],
+                milestone: false,
+                percentageCompletion: 0,
+                taskNumber: "0", // Backend typically replaces this
+                customFieldValues: {},
+                checklists: [],
+                type: 'User Story',
+                recurrence: {
+                    enabled: false,
+                    frequency: 'weekly',
+                    interval: 1,
+                    endType: 'never',
+                    endAfter: 10,
+                    endOn: new Date().toISOString(),
+                    weekDays: [],
+                    monthDay: 1,
+                    yearMonth: 1,
+                    customPattern: ''
+                },
+                createdBy: 'pranav.patil@nikqik.com', // Demo fallback
+                statusCategory: 'not_started'
+            };
+
+            const response = await skaryaClient.post(endpoint, payload);
 
             if (response.success) {
                 return { operation: `Create Task: ${task.name}`, status: 'success' };

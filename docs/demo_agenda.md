@@ -2,7 +2,7 @@ the **demo scope fully clear**. Let me summarize everything precisely and make a
 
 ---
 
-# 🎯 Standup Mediator — Prototype Demo Flow (Confirmed)
+# 🎯 Skarya Pulse — Prototype Demo Flow (Confirmed)
 
 **Entry Point:** Web app, test user (no auth for now).
 
@@ -102,7 +102,7 @@ the **demo scope fully clear**. Let me summarize everything precisely and make a
 
 * Basic handling for:
 
-  * LLM fails → show “Kobi is having trouble, try again”
+  * LLM fails → show “Pulse is having trouble, try again”
   * API fails → show “Cannot update tasks, try later”
   * Empty input → prompt again
 * **No complex retries or logging** for prototype.
@@ -117,11 +117,11 @@ the **demo scope fully clear**. Let me summarize everything precisely and make a
 
 ---
 
-here’s a **clean demo flow diagram** for the Standup Mediator prototype.  
+here’s a **clean demo flow diagram** for the Skarya Pulse prototype.  
 
 ---
 
-## 🎯 Standup Mediator — Prototype Flow Diagram
+## 🎯 Skarya Pulse — Prototype Flow Diagram
 
 ```
 [User Opens Web App]

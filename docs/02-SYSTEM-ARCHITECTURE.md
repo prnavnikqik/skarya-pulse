@@ -1,5 +1,5 @@
 # 02 — System Architecture
-## Standup Mediator — How Everything Connects
+## Skarya Pulse — How Everything Connects
 
 ---
 
@@ -14,7 +14,7 @@ The architecture is:
 User (web app)  →  Mediator Service  →  LLM API  →  skarya.ai Internal APIs
 ```
 
-The LLM is the brain. skarya.ai APIs are the hands. The mediator service is the wire between them.
+The LLM is the brain. skarya.ai APIs are the hands. The Pulse service is the wire between them.
 
 ---
 
@@ -26,7 +26,7 @@ The LLM is the brain. skarya.ai APIs are the hands. The mediator service is the 
 │                                                          │
 │   ┌──────────────────────────────────────────────────┐  │
 │   │  Standup Chat UI                                  │  │
-│   │  • Message thread (user ↔ Kobi)                  │  │
+│   │  • Message thread (user ↔ Pulse)                  │  │
 │   │  • Confirmation Card                              │  │
 │   │  • Session status indicator                       │  │
 │   └────────────────┬─────────────────────────────────┘  │
@@ -94,7 +94,7 @@ The LLM is the brain. skarya.ai APIs are the hands. The mediator service is the 
    → Gets: workspaceId, boardId, conversationHistory[], taskContext
 
 3. LLM Orchestration builds the prompt
-   → system prompt (Kobi persona + rules + task context)
+   → system prompt (Pulse persona + rules + task context)
    → full conversationHistory (all prior turns)
    → new user message appended
 
@@ -105,7 +105,7 @@ The LLM is the brain. skarya.ai APIs are the hands. The mediator service is the 
 5. If conversation NOT complete:
    → Save new turn to DB
    → Return assistant message to UI
-   → User sees Kobi's reply, types next message
+   → User sees Pulse's reply, types next message
 
 6. If conversation IS complete:
    → LLM called again with output extraction prompt

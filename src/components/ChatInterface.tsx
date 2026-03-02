@@ -55,7 +55,7 @@ export default function ChatInterface({ messages, onSendMessage, isComplete }: C
               {msg.role === 'assistant' && (
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-xl">🤖</span>
-                  <span className="text-xs font-semibold text-gray-500">KOBI</span>
+                  <span className="text-xs font-semibold text-gray-500 uppercase">PULSE</span>
                 </div>
               )}
               <div className="whitespace-pre-wrap leading-relaxed">{msg.content}</div>
@@ -80,7 +80,7 @@ export default function ChatInterface({ messages, onSendMessage, isComplete }: C
             value={input}
             onChange={(e) => setInput(e.target.value)}
             disabled={isLoading || isComplete}
-            placeholder={isComplete ? "Standup complete, waiting for confirmation..." : "Type your response..."}
+            placeholder={isComplete ? "Skarya Pulse complete, waiting for confirmation..." : "Type your response..."}
             className="flex-1 px-4 py-3 bg-gray-50 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all disabled:opacity-50"
           />
           <button

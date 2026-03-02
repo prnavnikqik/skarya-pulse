@@ -37,7 +37,7 @@ export default function SummaryPage() {
   if (!summaryData) {
     return (
       <div className="min-h-screen bg-gray-50 p-10 flex flex-col items-center">
-        <h2 className="text-2xl font-bold text-gray-800">No Standup Data Found</h2>
+        <h2 className="text-2xl font-bold text-gray-800">No Pulse Data Found</h2>
         <p className="text-gray-500 mt-2">Could not retrieve the summary for today.</p>
       </div>
     );
@@ -48,7 +48,7 @@ export default function SummaryPage() {
       <div className="max-w-6xl mx-auto space-y-8">
         <header className="flex justify-between items-end border-b pb-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Live Standup Summary</h1>
+            <h1 className="text-3xl font-bold text-gray-900">Live Pulse Summary</h1>
             <p className="text-gray-500 mt-1">Board ID: {summaryData.boardId} • Date: {summaryData.standupDate}</p>
           </div>
           <div className="text-sm font-medium bg-blue-50 text-blue-700 px-4 py-2 rounded-lg border border-blue-100">
@@ -62,14 +62,14 @@ export default function SummaryPage() {
               <tr className="bg-gray-50 border-b text-sm text-gray-600 uppercase tracking-wider">
                 <th className="p-4 font-medium w-1/5">Team Member</th>
                 <th className="p-4 font-medium w-[15%]">Status</th>
-                <th className="p-4 font-medium w-2/5">Daily Summary</th>
+                <th className="p-4 font-medium w-2/5">Pulse Summary</th>
                 <th className="p-4 font-medium w-1/4">Blockers & Risks</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {summaryData.memberSummaries.length === 0 && (
                 <tr>
-                  <td colSpan={4} className="p-8 text-center text-gray-500">No standup sessions recorded yet today.</td>
+                  <td colSpan={4} className="p-8 text-center text-gray-500">No Pulse sessions recorded yet today.</td>
                 </tr>
               )}
               {summaryData.memberSummaries.map((member: any, idx: number) => (

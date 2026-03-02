@@ -2,8 +2,8 @@ import axios, { AxiosInstance } from 'axios';
 
 // We use the cookie defined in .env for prototype authentication
 // or hardcoded tokens if cookie is unavailable.
-const SKARYA_API_URL = process.env.NEXT_PUBLIC_SKARYA_API_URL || 'https://skarya.skarya.ai';
-const SKARYA_COOKIE = process.env.SKARYA_COOKIE || '';
+const SKARYA_API_URL = process.env.NEXT_PUBLIC_SKARYA_API_URL || 'https://pulse.karyaa.ai';
+const SKARYA_COOKIE = process.env.SKARYA_COOKIE || process.env.SKARYA_SESSION_COOKIE || '';
 
 class SkaryaClient {
     public client: AxiosInstance;

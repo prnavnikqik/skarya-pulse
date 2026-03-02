@@ -1,5 +1,5 @@
 # 00 — Overview
-## Standup Mediator — What, Why, Who
+## Skarya Pulse — What, Why, Who
 
 ---
 
@@ -19,7 +19,7 @@ Every team runs a daily standup. In theory it's 15 minutes. In practice:
 
 ## What Are We Building?
 
-A web-based AI mediator that:
+A web-based AI Pulse that:
 
 1. **Replaces the standup call** — not assists it. Users interact privately with the bot instead of a group call.
 2. **Understands free-form language** — not a form. Users talk naturally, the LLM understands.
@@ -45,7 +45,7 @@ This is not a chatbot. It is a structured workflow automation powered by a conve
 ## Who Uses This?
 
 ### Individual Contributor (IC) — Primary User
-- Interacts with the mediator daily
+- Interacts with the Pulse daily
 - Answers questions about their own tasks
 - Reviews and confirms the proposed updates
 - Gets a private conversation — not exposed to the team unless they allow it
@@ -54,7 +54,7 @@ This is not a chatbot. It is a structured workflow automation powered by a conve
 - Receives the daily standup summary
 - Sees risk signals: who is blocked, who didn't submit, what's slipping
 - Can drill into any member's standup session
-- Does NOT interact with the mediator directly (Phase 0)
+- Does NOT interact with the Pulse directly (Phase 0)
 
 ### CEO / Exec — Tertiary (Future)
 - High-level dashboard view across all teams (Phase 4+)
@@ -76,7 +76,7 @@ This is not a chatbot. It is a structured workflow automation powered by a conve
 
 ## Product Philosophy
 
-> The mediator should feel like a smart, efficient colleague asking you about your work — not a ticket system interrogating you.
+> The Pulse should feel like a smart, efficient colleague asking you about your work — not a ticket system interrogating you.
 
 - Tone: **Neutral corporate** — not overly friendly, not robotic
 - Confirmation: **Always required** — no silent writes to tasks. Ever.

@@ -110,13 +110,13 @@ GET /api/boardTask/getBoardTask?boardId={boardId}&workspaceId={workspaceId}
 }
 ```
 
-**Key fields for mediator:**
+**Key fields for Pulse:**
 - `_id` — internal task ID used for all writes
 - `taskNumber` — human-readable (BT0201) — use for display
 - `name` — used for fuzzy matching when user mentions a task
 - `status` — current status
 - `statusCategory` — `not_started` | `in_progress` | `completed`
-- `percentageCompletion` — already exists, mediator can update this
+- `percentageCompletion` — already exists, Pulse can update this
 - `dependency[]` — array of dependent task IDs — already exists on model ✅
 - `relation[]` — array of related task IDs — already exists on model ✅
 - `assigneePrimary.email` — filter by this to get the logged-in user's tasks
@@ -328,7 +328,7 @@ POST /api/emailNotification/boardEmail
 - `subtask-update-parentAssignee` — notify parent task assignee when subtask is updated
 - `subtask-assigneeTask-update` — notify subtask assignee when their task changes
 
-**Method needed for mediator (to confirm/add):**
+**Method needed for Pulse (to confirm/add):**
 - `task-blocked-notify-lead` — notify team lead when a task is blocked
 
 ---

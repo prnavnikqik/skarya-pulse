@@ -2,18 +2,18 @@
 
 import { TaskWriter } from '@/integrations/task-writer';
 
-export async function executeSkaryaAction(toolName: string, args: any) {
+export async function executeSkaryaAction(toolName: string, args: Record<string, unknown>) {
   try {
     console.log(`[Server Action] Executing ${toolName} with args:`, args);
 
     if (toolName === 'update_task_status') {
       const res = await TaskWriter.applyUpdates({
         task_updates: [{
-          _id: args.taskId,
-          taskNumber: args.taskNumber,
-          status: args.status,
-          statusCategory: args.statusCategory,
-          percentageCompletion: args.percentageCompletion
+          _id: String(args.taskId || ''),
+          taskNumber: String(args.taskNumber || ''),
+          status: String(args.status || ''),
+          statusCategory: args.statusCategory as 'not_started' | 'in_progress' | 'completed',
+          percentageCompletion: args.percentageCompletion ? Number(args.percentageCompletion) : undefined
         }],
         progress_comments: [],
         roadblock_comments: [],
@@ -31,9 +31,9 @@ export async function executeSkaryaAction(toolName: string, args: any) {
       const res = await TaskWriter.applyUpdates({
         task_updates: [],
         progress_comments: [{
-          taskId: args.taskId,
-          taskNumber: args.taskNumber,
-          comment: args.comment
+          taskId: String(args.taskId || ''),
+          taskNumber: String(args.taskNumber || ''),
+          comment: String(args.comment || '')
         }],
         roadblock_comments: [],
         dependencies_to_add: [],
@@ -54,9 +54,9 @@ export async function executeSkaryaAction(toolName: string, args: any) {
         dependencies_to_add: [],
         relations_to_add: [],
         new_tasks_to_create: [{
-          ...args,
-          boardId: '694a87f7e6aa80a347e86e5a', // Demo default
-          workspaceId: '692ba14ce2552a8b5afe6e9a' // Demo default
+          ...(args as Record<string, unknown> as any),
+          boardId: args.boardId ? String(args.boardId) : '69a2118ecf1d73e568280ba5', // Staging default
+          workspaceId: args.workspaceId ? String(args.workspaceId) : '69a202afcf1d73e568280529' // Staging default
         }],
         new_subtasks_to_create: [],
         notifications_to_send: [],
@@ -66,8 +66,8 @@ export async function executeSkaryaAction(toolName: string, args: any) {
     }
 
     return { success: false, error: 'Unknown tool name' };
-  } catch (error: any) {
+  } catch (error: Error | unknown) {
     console.error('[Server Action Error]', error);
-    return { success: false, error: error.message };
+    return { success: false, error: error instanceof Error ? error.message : String(error) };
   }
 }

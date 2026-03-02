@@ -224,7 +224,7 @@ export interface RiskSignal {
 
 ---
 
-## Mediator API Request/Response Types
+## Pulse API Request/Response Types
 
 ```typescript
 // POST /api/standup/start
@@ -234,7 +234,7 @@ export interface StartSessionRequest {
 }
 export interface StartSessionResponse {
   sessionId: string
-  firstMessage: string         // Kobi's greeting/first question
+  firstMessage: string         // Pulse's greeting/first question
   taskCount: number            // how many tasks were loaded
 }
 
@@ -244,7 +244,7 @@ export interface SendMessageRequest {
   content: string
 }
 export interface SendMessageResponse {
-  message: string              // Kobi's reply
+  message: string              // Pulse's reply
   isComplete: boolean          // true = conversation done, show confirmation card next
   llmOutput?: StandupOutput    // only present when isComplete = true
 }

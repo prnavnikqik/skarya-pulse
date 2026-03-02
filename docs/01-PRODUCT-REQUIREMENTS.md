@@ -1,5 +1,5 @@
 # 01 — Product Requirements
-## Standup Mediator — Full PRD v0.3
+## Skarya Pulse — Full PRD v0.3
 
 ---
 
@@ -13,7 +13,7 @@
 | Session storage | **Persist every session to DB** | Standup history becomes intelligence later |
 | Follow-up depth | **Max 1 follow-up per ambiguity** | Avoid conversation loops. Calibrate later. |
 | Task matching logic | **Match → Clarify → Create** (see §4) | Zero redundancy, zero duplicate tasks |
-| Privacy default | **Private (1-on-1 with mediator)** | User's responses not visible to team by default |
+| Privacy default | **Private (1-on-1 with Pulse)** | User's responses not visible to team by default |
 | Tone | **Neutral corporate** | Friendly but efficient. Not robotic, not casual. |
 | Intelligence level | **Level 3** (context-aware, knows user's tasks) | Level 4 (proactive alerts) is Phase 2 |
 | Text vs Voice | **Text only** | Voice is Phase 2 |
@@ -23,7 +23,7 @@
 ## 2. Functional Requirements
 
 ### FR-001 — Session Start
-- User opens the Standup Mediator web app
+- User opens the Skarya Pulse web app
 - User must be authenticated (via skarya.ai session/token)
 - User clicks "Start My Standup"
 - System fetches all tasks where user is `assigneePrimary` or in `collaborators[]` from skarya.ai
@@ -43,7 +43,7 @@
 - LLM must stay on-topic — if user goes off-script, redirect politely once
 
 ### FR-003 — Task Matching Logic
-Given a user's free-form reference to a task, the mediator MUST:
+Given a user's free-form reference to a task, the Pulse MUST:
 
 1. **Search** tasks where user is assignee or collaborator, match by name similarity
 2. **If 1 clear match found** → proceed with it, confirm inline ("I found 'Login Bug Fix' — is that what you mean?")
@@ -78,7 +78,7 @@ Mediator detects and creates links using skarya.ai's existing `dependency[]` and
 | "X is basically the same issue as Y" | relation (duplicate) | `task.relation[]` |
 | "X is part of the bigger migration task" | subtask_of | create subtask under parent |
 
-**Rule: If mediator is unsure about which task a relationship points to → ask 1 clarifying question before creating the link.**
+**Rule: If Pulse is unsure about which task a relationship points to → ask 1 clarifying question before creating the link.**
 
 ### FR-007 — Subtask Handling
 - If user mentions a subtask: find it by name under the parent task
@@ -87,7 +87,7 @@ Mediator detects and creates links using skarya.ai's existing `dependency[]` and
 - If user mentions creating a new subtask → confirm name and parent task, then create
 
 ### FR-008 — Confirmation Step
-- After conversation ends, mediator shows user a **Confirmation Card**
+- After conversation ends, Pulse shows user a **Confirmation Card**
 - Card lists EVERY proposed change: status updates, comments, new tasks, dependencies, notifications
 - User must explicitly click **Confirm & Update** before anything is written
 - User can click **Edit** on any line item to modify it before confirming
@@ -163,7 +163,7 @@ Every session must store:
 - User can only update tasks where they are `assigneePrimary` or in `collaborators[]`
 
 ### NFR-005 — Session Privacy
-- Standup conversation content is private between user and mediator by default
+- Standup conversation content is private between user and Pulse by default
 - Team lead sees only the structured summary output, not the raw conversation
 - Raw conversation visible to team lead only if user explicitly enables it (not in prototype)
 
@@ -178,5 +178,5 @@ Every session must store:
 - Proactive risk alerts (Level 4)
 - Customizable tone / persona
 - Penalty or escalation for missed standups
-- Calendar integration (Outlook OAuth exists in skarya but not used by mediator yet)
+- Calendar integration (Outlook OAuth exists in skarya but not used by Pulse yet)
 - Jira / Linear / Asana sync

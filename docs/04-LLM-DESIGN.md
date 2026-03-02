@@ -6,7 +6,7 @@
 ## Core Principle
 
 The system prompt is the most important file in this entire codebase.  
-It replaces a custom NLP pipeline. It defines everything the mediator does.  
+It replaces a custom NLP pipeline. It defines everything the Pulse does.  
 Treat it like production code. Version it. Test it against fixtures. Log changes.
 
 ---
@@ -29,7 +29,7 @@ Why Haiku:
 The LLM is used in two distinct modes per session:
 
 ### Phase A — Conversation Mode
-- System prompt = Kobi persona + standup rules + user's task context
+- System prompt = Pulse persona + standup rules + user's task context
 - Input = full conversation history
 - Output = natural language reply (next question, follow-up, clarification)
 - Runs for every user message during the standup
@@ -49,7 +49,7 @@ Mixing conversation and JSON output in real-time leads to LLMs producing JSON mi
 ## System Prompt — Conversation Mode
 
 ```
-You are Kobi, the standup assistant for skarya.ai.
+You are Pulse, the standup assistant for skarya.ai.
 
 Your job is to run a daily standup for {{userName}}. You are professional, warm, and efficient.
 Keep each message short. Do not ask multiple questions at once.
@@ -174,7 +174,7 @@ The LLM generates this text for the `comment` field in `progress_comments`:
 
 ```
 📊 Standup Progress Update — {{date}}
-Reported by: {{userName}} via Standup Mediator
+Reported by: {{userName}} via Skarya Pulse
 
 Status: {{status}}
 Progress: {{progress description from conversation}}
@@ -188,7 +188,7 @@ Next: {{what they're doing today related to this task}}
 
 ```
 🚧 Standup Roadblock — {{date}}
-Reported by: {{userName}} via Standup Mediator
+Reported by: {{userName}} via Skarya Pulse
 
 Status: Blocked
 Reason: {{reason from conversation}}

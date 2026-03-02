@@ -61,7 +61,7 @@ That's it. That's the demo.
   - save session to DB
   - return first message
 
-**Test:** Call `/api/standup/start` from curl. Get back a real first message from Kobi. See real task names in the message.
+**Test:** Call `/api/standup/start` from curl. Get back a real first message from Pulse. See real task names in the message.
 
 ---
 
@@ -119,10 +119,10 @@ That's it. That's the demo.
 **Goal:** Working web UI. Looks presentable for demo.
 
 ### Morning
-- [ ] Chat UI — message thread component (user messages + Kobi messages)
+- [ ] Chat UI — message thread component (user messages + Pulse messages)
 - [ ] Session start screen ("Start My Standup" button)
 - [ ] Message input + send button
-- [ ] Loading states (Kobi is thinking...)
+- [ ] Loading states (Pulse is thinking...)
 - [ ] Connect to `/api/standup/start` and `/api/standup/message`
 
 ### Afternoon
