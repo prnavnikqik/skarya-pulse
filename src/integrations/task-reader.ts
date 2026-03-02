@@ -16,9 +16,8 @@ export class TaskReader {
     ): Promise<TaskWithSubtasks[]> {
         console.log(`[TaskReader] Fetching tasks for ${userEmail} in board ${boardId}`);
 
-        // Endpoint from docs: GET /api/boardTask/getBoardTask
-        // (Assuming we use the general one and filter, or we could use getFilteredAssignee but getBoardTask is safe)
-        const response = await skaryaClient.get<SkaryaTask[]>('/api/boardTask/getBoardTask', {
+        // We use the specific filtered assignee endpoint based on the staging schema discovery
+        const response = await skaryaClient.get<any>('/api/boardTask/getFilteredAssignee', {
             boardId,
             workspaceId
         });
@@ -27,17 +26,17 @@ export class TaskReader {
             throw new Error(`Failed to fetch tasks: ${response.message || 'Unknown error'}`);
         }
 
-        // The real API returns data.tasks array inside the data object
-        const allTasks: SkaryaTask[] = (response.data as any)?.tasks || [];
+        // the endpoint returns data directly as an array or inside tasks. We'll handle both.
+        const allTasks: SkaryaTask[] = Array.isArray(response.data) ? response.data : ((response.data as any)?.tasks || []);
 
         // Filter tasks logically based on assignee or collaborators
         const userTasks = allTasks.filter((task: any) => {
-            const isAssignee = task.assigneePrimary?.email === userEmail;
-            const isCollaborator = task.collaborators?.includes(userEmail);
-            return isAssignee || isCollaborator;
+            // Skarya's API structure for assignee varies. We will deeply scan for the email string.
+            const taskString = JSON.stringify(task).toLowerCase();
+            return taskString.includes(String(userEmail).toLowerCase());
         });
 
-        console.log(`[TaskReader] Found ${userTasks.length} tasks relevant to the user.`);
+        console.log(`[TaskReader] Found ${userTasks.length} tasks relevant to the user after fetching.`);
 
         // For each task, fetch subtasks
         const tasksWithSubtasks: TaskWithSubtasks[] = await Promise.all(

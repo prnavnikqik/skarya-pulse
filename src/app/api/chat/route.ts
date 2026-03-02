@@ -88,6 +88,27 @@ When interacting with a user:
           comment: z.string().describe('The text to post as a comment')
         }),
         // Omit execute to ask for confirmation
+      } as any),
+
+      get_board_info: tool({
+        description: 'Fetch the board\'s basic information, including the board name, available statuses, and priorities. Use this if the user asks for info about the board or workspace.',
+        parameters: z.object({}),
+        // @ts-ignore
+        execute: async (_args) => {
+          try {
+            return {
+              success: true,
+              message: `Retrieved mock board info for staging workspace.`,
+              info: {
+                boardName: "Main Standup Board",
+                statuses: ["To Do", "In Progress", "Review", "Done", "Blocked", "Backlog"],
+                priorities: ["Low", "Medium", "High", "Critical"]
+              }
+            };
+          } catch (error: Error | unknown) {
+            return { success: false, error: error instanceof Error ? error.message : String(error) };
+          }
+        }
       } as any)
     },
     maxSteps: 3, // Allow the AI to call a tool, get the result, and then respond to the user
