@@ -41,6 +41,12 @@ export class TaskWriter {
             results.push(res);
         }
 
+        // 5. New Subtasks
+        for (const subtask of output.new_subtasks_to_create) {
+            const res = await this.createSubtask(subtask);
+            results.push(res);
+        }
+
         // (Dependencies and Relations would go here, omitting for basic prototype if unconfirmed)
 
         return results;
@@ -134,6 +140,33 @@ export class TaskWriter {
             return { operation: `Create Task: ${task.name}`, status: 'failed', error: response.message };
         } catch (e: any) {
             return { operation: `Create Task: ${task.name}`, status: 'failed', error: e.message };
+        }
+    }
+
+    private static async createSubtask(subtask: NewSubtask): Promise<WritebackResult> {
+        try {
+            const endpoint = `/api/boardSubtask/createBoardSubtask`;
+            const payload = {
+                name: subtask.name,
+                taskId: subtask.parentTaskId,
+                assignee: { email: subtask.assigneeEmail || 'pranav.patil@nikqik.com', name: 'User' },
+                priority: subtask.priority || 'Medium',
+                status: subtask.status || 'To Do',
+                dueDate: new Date(Date.now() + 86400000 * 7).toISOString(),
+                startDate: new Date().toISOString(),
+                description: '',
+                checklist: [],
+                createdBy: 'pranav.patil@nikqik.com'
+            };
+
+            const response = await skaryaClient.post(`${endpoint}?boardId=${subtask.boardId || '69a2118ecf1d73e568280ba5'}&workspaceId=${subtask.workspaceId || '69a202afcf1d73e568280529'}`, payload);
+
+            if (response.success) {
+                return { operation: `Create Subtask: ${subtask.name}`, status: 'success' };
+            }
+            return { operation: `Create Subtask: ${subtask.name}`, status: 'failed', error: response.message };
+        } catch (e: any) {
+            return { operation: `Create Subtask: ${subtask.name}`, status: 'failed', error: e.message };
         }
     }
 }
