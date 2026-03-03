@@ -1,6 +1,7 @@
 // 
 export const dynamic = 'force-dynamic';
 import { groq } from '@ai-sdk/groq';
+import { createAnthropic } from '@ai-sdk/anthropic';
 import { streamText, tool } from 'ai';
 import { z } from 'zod';
 import { TaskReader } from '@/integrations/task-reader';
@@ -9,15 +10,26 @@ import { TaskWriter } from '@/integrations/task-writer';
 
 export const maxDuration = 30;
 
+const anthropic = createAnthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY || '',
+});
+
 export async function POST(req: Request) {
-  const { messages, workspaceId, boardId, userEmail } = await req.json();
+  const { messages, workspaceId, boardId, userEmail, modelId } = await req.json();
 
   if (!workspaceId || !boardId || !userEmail) {
     return new Response('Missing required context (workspaceId, boardId, userEmail)', { status: 400 });
   }
 
+  let selectedModel;
+  if (modelId && modelId.startsWith('claude')) {
+    selectedModel = anthropic(modelId);
+  } else {
+    selectedModel = groq(modelId || 'llama-3.3-70b-versatile');
+  }
+
   const result = streamText({
-    model: groq('llama-3.3-70b-versatile'),
+    model: selectedModel,
     system: `You are Skarya Brain, an omniscient AI project manager embedded inside the Skarya suite (currently testing against staging domain skaryaa.ai).
 Your primary mission is to REPLACE the daily standup meeting and enforce developer accountability.
 

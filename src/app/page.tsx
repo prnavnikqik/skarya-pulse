@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useChat } from '@ai-sdk/react';
 import { executeSkaryaAction } from '@/app/actions';
-import { Brain, Sparkles, Send, CheckCircle2, XCircle, Bot, User, Loader2, AlertCircle } from 'lucide-react';
+import { Brain, Sparkles, Send, CheckCircle2, XCircle, Bot, User, Loader2, AlertCircle, ChevronDown } from 'lucide-react';
 
 // Hardcoded for demo/staging testing against pulse.karyaa.ai
 const TEST_USER = {
@@ -13,13 +13,23 @@ const TEST_USER = {
   userName: 'Pranav Patil'
 };
 
+const AVAILABLE_MODELS = [
+  { id: 'llama-3.3-70b-versatile', name: 'Llama 3.3 70B' },
+  { id: 'claude-3-7-sonnet-20250219', name: 'Claude 3.7 Sonnet' },
+  { id: 'claude-3-5-sonnet-latest', name: 'Claude 3.5 Sonnet' },
+  { id: 'claude-3-5-haiku-latest', name: 'Claude 3.5 Haiku' }
+];
+
 export default function PulsePage() {
+  const [selectedModel, setSelectedModel] = useState(AVAILABLE_MODELS[0].id);
+
   const chatControls = useChat({
     api: '/api/chat',
     body: {
       workspaceId: TEST_USER.workspaceId,
       boardId: TEST_USER.boardId,
-      userEmail: TEST_USER.userEmail
+      userEmail: TEST_USER.userEmail,
+      modelId: selectedModel
     },
     maxSteps: 3, // Support multi-step tool calls
   } as any);
@@ -72,6 +82,20 @@ export default function PulsePage() {
           </div>
         </div>
         <div className="flex items-center gap-4">
+          <div className="relative group/model">
+            <select
+              title="Select Model"
+              value={selectedModel}
+              onChange={(e) => setSelectedModel(e.target.value)}
+              className="appearance-none bg-white/50 border border-indigo-100 hover:border-indigo-300 px-4 py-2 pr-10 rounded-full shadow-sm text-xs font-semibold text-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all cursor-pointer inline-block"
+            >
+              {AVAILABLE_MODELS.map(model => (
+                <option key={model.id} value={model.id}>{model.name}</option>
+              ))}
+            </select>
+            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-indigo-500 pointer-events-none" />
+          </div>
+
           <div className="flex items-center gap-2 bg-white/50 border border-indigo-50 px-4 py-2 rounded-full shadow-sm">
             <span className="relative flex h-2.5 w-2.5">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
