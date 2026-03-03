@@ -109,6 +109,12 @@ export default function PulsePage() {
                   </p>
                 </div>
                 <div className="grid grid-cols-2 gap-4 w-full mt-8">
+                  <button onClick={() => setInput("Start my daily standup.")} className="col-span-2 group text-left p-5 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-2xl hover:from-indigo-600 hover:to-purple-600 shadow-md hover:shadow-lg transition-all duration-300">
+                    <span className="font-bold block mb-2 text-sm uppercase tracking-wider flex items-center gap-2">
+                      <CheckCircle2 className="w-5 h-5 text-white animate-pulse" /> Start Daily Standup
+                    </span>
+                    <span className="text-white/90 text-sm font-medium leading-relaxed">Let Skarya Pulse ask about your progress, blockers, and update your tasks for you.</span>
+                  </button>
                   <button onClick={() => setInput("Analyze the board health and find stuck tasks")} className="group text-left p-5 bg-white/60 backdrop-blur-lg border border-indigo-50 rounded-2xl hover:border-indigo-200 hover:bg-white hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:-translate-y-1 transition-all duration-300">
                     <span className="font-bold text-indigo-600 block mb-2 text-sm uppercase tracking-wider flex items-center gap-2">
                        <Brain className="w-4 h-4" /> Analyze Health
