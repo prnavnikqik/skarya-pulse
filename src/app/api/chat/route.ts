@@ -109,6 +109,76 @@ When interacting with a user:
             return { success: false, error: error instanceof Error ? error.message : String(error) };
           }
         }
+      } as any),
+
+      analyze_board_health: tool({
+        description: 'Read the current tasks and analyze the overall health of the project board. Identify bottlenecks, stuck tasks (e.g., Blocked status, untouched tasks), or overdue items. Call this ONLY when the user explicitly asks for a board analysis or executive summary.',
+        parameters: z.object({}),
+        // @ts-ignore
+        execute: async (_args) => {
+          try {
+            const tasks = await TaskReader.fetchUserTasks(boardId, workspaceId, userEmail);
+
+            // Simple logic: filter out done tasks and find anything Blocked
+            const activeTasks = tasks.filter(t => t.status !== 'Done' && t.statusCategory !== 'completed');
+            const blockedTasks = tasks.filter(t => String(t.status).toLowerCase().includes('block'));
+
+            return {
+              success: true,
+              message: `Board Health Analysis complete.`,
+              metrics: {
+                totalActiveTasks: activeTasks.length,
+                totalBlockedTasks: blockedTasks.length,
+                stuckTasks: blockedTasks.map(t => ({ id: t.taskNumber, name: t.name, status: t.status })),
+                recommendation: blockedTasks.length > 0
+                  ? "Recommend immediate intervention on blocked tasks."
+                  : "Board is relatively healthy with no blocked tasks detected."
+              }
+            };
+          } catch (error: Error | unknown) {
+            return { success: false, error: error instanceof Error ? error.message : String(error) };
+          }
+        }
+      } as any),
+
+      create_subtask: tool({
+        description: 'Create a new subtask under an existing parent task. Use this when the user asks to break down a larger task into smaller chunks.',
+        parameters: z.object({
+          parentTaskId: z.string().describe('The internal _id of the parent task'),
+          name: z.string().describe('The name or title of the subtask'),
+          assigneeEmail: z.string().describe('The email of the assigned user. Defaults to the current user.')
+        }),
+        // Omit execute to ask for confirmation from the client
+      } as any),
+
+      generate_status_report: tool({
+        description: 'Generate a comprehensive daily or weekly status report based on the user\'s active and completed tasks.',
+        parameters: z.object({
+          timeframe: z.enum(['daily', 'weekly']).describe('The timeframe for the report')
+        }),
+        // @ts-ignore
+        execute: async (args) => {
+          try {
+            const tasks = await TaskReader.fetchUserTasks(boardId, workspaceId, userEmail);
+
+            const completed = tasks.filter(t => t.statusCategory === 'completed' || t.status === 'Done');
+            const inProgress = tasks.filter(t => t.statusCategory === 'in_progress' || t.status === 'In Progress');
+            const todo = tasks.filter(t => t.statusCategory === 'not_started' || ['To Do', 'Backlog'].includes(t.status));
+
+            return {
+              success: true,
+              message: `Status report compiled for timeframe: ${args.timeframe}`,
+              reportData: {
+                summary: `You have completed ${completed.length} tasks and are actively working on ${inProgress.length} tasks.`,
+                completedItems: completed.map(t => t.name),
+                inProgressItems: inProgress.map(t => t.name),
+                upcomingItems: todo.map(t => t.name).slice(0, 5) // Just top 5
+              }
+            };
+          } catch (error: Error | unknown) {
+            return { success: false, error: error instanceof Error ? error.message : String(error) };
+          }
+        }
       } as any)
     },
     maxSteps: 3, // Allow the AI to call a tool, get the result, and then respond to the user
