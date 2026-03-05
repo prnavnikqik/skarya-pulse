@@ -7,6 +7,18 @@ export async function executeSkaryaAction(toolName: string, args: Record<string,
     console.log(`[Server Action] Executing ${toolName} with args:`, args);
 
     if (toolName === 'update_task_status') {
+      // Security Validation: Cross-reference Assignee
+      const authMeta = args._authMeta as { userEmail: string, workspaceId: string, boardId: string } | undefined;
+      if (authMeta) {
+        const { TaskReader } = await import('@/integrations/task-reader');
+        const userTasks = await TaskReader.fetchUserTasks(authMeta.boardId, authMeta.workspaceId, authMeta.userEmail);
+        const taskBelongsToUser = userTasks.some(t => String(t._id) === String(args.taskId) || String(t.taskNumber) === String(args.taskNumber));
+
+        if (!taskBelongsToUser) {
+          throw new Error(`Unauthorized Assignee: You cannot update a task that is not assigned to ${authMeta.userEmail}.`);
+        }
+      }
+
       const res = await TaskWriter.applyUpdates({
         task_updates: [{
           _id: String(args.taskId || ''),
@@ -82,6 +94,11 @@ export async function executeSkaryaAction(toolName: string, args: Record<string,
         summary_for_lead: ''
       });
       return { success: true, results: res };
+    }
+
+    if (toolName === 'draft_document') {
+      // For now, drafting just "confirms" and effectively creates a standalone success record in chat
+      return { success: true, message: `Draft Document confirmed: ${args.title}`, draftedContent: args.content };
     }
 
     return { success: false, error: 'Unknown tool name' };

@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/test';
+const MONGODB_URI = process.env.MONGODB_URI; // Must be set in .env
 
 /**
  * Global is used here to maintain a cached connection across hot reloads

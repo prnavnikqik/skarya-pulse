@@ -10,20 +10,21 @@
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.53",
+    "@ai-sdk/google": "^3.0.42",
     "@ai-sdk/groq": "^3.0.26",
     "@ai-sdk/openai": "^3.0.37",
-    "@ai-sdk/react": "^3.0.107",
-    "ai": "^6.0.105",
-    "axios": "^1.13.6",
-    "dotenv": "^17.3.1",
-    "groq-sdk": "^0.37.0",
-    "lucide-react": "^0.576.0",
-    "mongoose": "^9.2.3",
-    "next": "16.1.6",
-    "react": "19.2.3",
-    "react-dom": "19.2.3",
+    "@ai-sdk/react": "^3.0.118",
+    "ai": "^3.4.30",
+    "axios": "^1.7.9",
+    "dotenv": "^16.4.7",
+    "groq-sdk": "^0.9.1",
+    "lucide-react": "^0.474.0",
+    "mongoose": "^8.9.5",
+    "next": "15.1.7",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
     "tailwindcss-animate": "^1.0.7",
-    "zod": "^4.3.6"
+    "zod": "^3.24.2"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -32,7 +33,7 @@
     "@types/react-dom": "^19",
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9",
-    "eslint-config-next": "16.1.6",
+    "eslint-config-next": "15.1.6",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
