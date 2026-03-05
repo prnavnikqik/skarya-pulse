@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import connectToDatabase from '@/lib/mongoose';
 import Standup from '@/models/Standup';
-import { streamText, tool, StreamData } from 'ai';
+import { streamText, tool } from 'ai';
 import { groq } from '@ai-sdk/groq';
 import { anthropic } from '@ai-sdk/anthropic';
 import { google } from '@ai-sdk/google';
@@ -28,8 +28,6 @@ export async function POST(req: Request) {
     } else {
       selectedModel = groq(modelId || 'llama-3.3-70b-versatile');
     }
-
-    const data = new StreamData();
 
     const result = await streamText({
       model: selectedModel,
@@ -104,11 +102,10 @@ When interacting with a user:
           }
         })
       },
-      onFinish: () => data.close(),
       maxSteps: 3,
     });
 
-    return result.toDataStreamResponse({ data });
+    return result.toUIMessageStreamResponse();
   } catch (err: any) {
     console.error("AI CHAT ERROR:", err);
     return new Response(JSON.stringify({ error: err.message }), {
