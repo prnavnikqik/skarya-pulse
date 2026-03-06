@@ -7,10 +7,14 @@ import { anthropic } from '@ai-sdk/anthropic';
 import { google } from '@ai-sdk/google';
 import axios from 'axios';
 import { z } from 'zod';
+import { TaskReader } from '@/integrations/task-reader';
 
 const SKARYA_API_URL = process.env.NEXT_PUBLIC_SKARYA_API_URL || 'https://pulse.karyaa.ai';
 const SKARYA_COOKIE = process.env.SKARYA_SESSION_COOKIE;
 const PROTOTYPE_USER_NAME = process.env.PROTOTYPE_USER_NAME || 'Pranav Patil';
+
+export const dynamic = 'force-dynamic';
+export const maxDuration = 60;
 
 export async function POST(req: Request) {
   try {
@@ -48,10 +52,21 @@ When interacting with a user:
           description: 'Fetch all tasks assigned to the current user in the active board. Call this whenever the user asks about their own tasks, what they should do today, or asks for a summary of their work.',
           parameters: z.object({}),
           execute: async () => {
-            const res = await axios.get(`${SKARYA_API_URL}/api/tasks?userEmail=${userEmail}&boardId=${boardId}`, {
-              headers: { 'Cookie': `session=${SKARYA_COOKIE}` }
-            });
-            return { success: true, tasks: res.data.tasks.filter((t: any) => t.assigneeEmail === userEmail) };
+            try {
+              const rawTasks = await TaskReader.fetchUserTasks(boardId, workspaceId, userEmail);
+              const tasks = rawTasks.map(t => ({
+                id: t._id,
+                name: t.name,
+                status: t.status,
+                priority: t.priority,
+                dueDate: t.dueDate,
+                subtasks: t.subtasks?.map((s: any) => ({ title: s.name, status: s.status })) || []
+              }));
+              return { success: true, tasks };
+            } catch (err: any) {
+              console.error("GET_USER_TASKS ERROR:", err.message);
+              return { success: false, error: err.message || 'Failed to fetch tasks' };
+            }
           }
         }),
 
@@ -105,7 +120,12 @@ When interacting with a user:
       maxSteps: 3,
     });
 
-    return result.toUIMessageStreamResponse();
+    return result.toDataStreamResponse({
+      getErrorMessage: (error: any) => {
+        console.error("STREAM CRASH ERROR:", error);
+        return error instanceof Error ? error.message : String(error);
+      }
+    });
   } catch (err: any) {
     console.error("AI CHAT ERROR:", err);
     return new Response(JSON.stringify({ error: err.message }), {
