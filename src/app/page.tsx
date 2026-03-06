@@ -35,17 +35,17 @@ export default function PulsePage() {
         setPastStandups(data.standups);
         setShowStandups(true);
       }
-    } catch(e) { console.error('Failed to fetch standups', e); }
+    } catch (e) { console.error('Failed to fetch standups', e); }
   };
 
   const [localInput, setLocalInput] = useState('');
-  
-  const { 
-    messages, 
-    status, 
-    error, 
-    append, 
-    addToolResult 
+
+  const {
+    messages,
+    status,
+    error,
+    append,
+    addToolResult
   } = useChat({
     api: '/api/chat',
     body: {
@@ -70,16 +70,16 @@ export default function PulsePage() {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!localInput?.trim() || isLoading) return;
-    
+
     // Support either append or sendMessage depending on version
     if (append) {
-      append({ role: 'user', content: localInput }, { 
-        body: { 
-          workspaceId: TEST_USER.workspaceId, 
-          boardId: TEST_USER.boardId, 
-          userEmail: TEST_USER.userEmail, 
-          modelId: selectedModel 
-        } 
+      append({ role: 'user', content: localInput }, {
+        body: {
+          workspaceId: TEST_USER.workspaceId,
+          boardId: TEST_USER.boardId,
+          userEmail: TEST_USER.userEmail,
+          modelId: selectedModel
+        }
       });
     }
     setLocalInput('');
@@ -90,7 +90,7 @@ export default function PulsePage() {
 
   return (
     <main className="h-screen bg-[#FAFAFC] flex flex-col font-sans overflow-hidden selection:bg-indigo-200">
-      
+
       {/* Premium Header */}
       <header className="flex-shrink-0 w-full bg-white/70 backdrop-blur-xl border-b border-indigo-100/50 py-4 px-8 flex items-center justify-between z-20 sticky top-0 shadow-[0_4px_24px_-12px_rgba(79,70,229,0.15)]">
         <div className="flex items-center gap-3">
@@ -138,14 +138,14 @@ export default function PulsePage() {
       <div className="relative flex-1 w-full overflow-hidden flex justify-center">
         {/* Decorative Background Orbs */}
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
-           <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-purple-300/20 blur-[100px] animate-blob"></div>
-           <div className="absolute top-[20%] right-[-10%] w-[35%] h-[35%] rounded-full bg-indigo-300/20 blur-[100px] animate-blob animation-delay-2000"></div>
-           <div className="absolute bottom-[-20%] left-[20%] w-[50%] h-[50%] rounded-full bg-pink-300/20 blur-[120px] animate-blob animation-delay-4000"></div>
+          <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-purple-300/20 blur-[100px] animate-blob"></div>
+          <div className="absolute top-[20%] right-[-10%] w-[35%] h-[35%] rounded-full bg-indigo-300/20 blur-[100px] animate-blob animation-delay-2000"></div>
+          <div className="absolute bottom-[-20%] left-[20%] w-[50%] h-[50%] rounded-full bg-pink-300/20 blur-[120px] animate-blob animation-delay-4000"></div>
         </div>
-        
+
         <div className="w-full max-w-4xl h-full flex flex-col relative z-10">
           <div className="flex-1 overflow-y-auto px-4 py-8 pb-40 scroll-smooth custom-scrollbar">
-            
+
             {/* Error Banner */}
             {error && (
               <div className="mb-6 mx-auto max-w-2xl bg-red-50 border border-red-100 p-4 rounded-2xl flex items-center gap-3 text-red-700 animate-in fade-in slide-in-from-top-4 duration-500">
@@ -180,7 +180,7 @@ export default function PulsePage() {
                   </button>
                   <button onClick={() => setLocalInput("Analyze the board health and find stuck tasks")} className="group text-left p-5 bg-white/60 backdrop-blur-lg border border-indigo-50 rounded-2xl hover:border-indigo-200 hover:bg-white hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:-translate-y-1 transition-all duration-300">
                     <span className="font-bold text-indigo-600 block mb-2 text-sm uppercase tracking-wider flex items-center gap-2">
-                       <Brain className="w-4 h-4" /> Analyze Health
+                      <Brain className="w-4 h-4" /> Analyze Health
                     </span>
                     <span className="text-slate-600 text-sm font-medium leading-relaxed group-hover:text-slate-900">Scan entire board for bottlenecks & overdues.</span>
                   </button>
@@ -195,9 +195,9 @@ export default function PulsePage() {
             )}
 
             <div className="space-y-8">
-              {messages.map((msg: any, idx) => (
+              {messages.map((msg: any, idx: number) => (
                 <div key={idx} className={`flex items-end gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  
+
                   {/* Bot Avatar */}
                   {msg.role === 'assistant' && (
                     <div className="flex-shrink-0 w-9 h-9 rounded-[14px] bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-md mb-1 z-10">
@@ -209,11 +209,10 @@ export default function PulsePage() {
                     {/* Text Bubble */}
                     {msg.content && (
                       <div
-                        className={`px-5 py-4 text-[15px] font-medium leading-relaxed relative ${
-                          msg.role === 'user'
+                        className={`px-5 py-4 text-[15px] font-medium leading-relaxed relative ${msg.role === 'user'
                             ? 'bg-gradient-to-r from-indigo-600 to-indigo-700 text-white shadow-md rounded-[24px] rounded-br-[8px]'
                             : 'bg-white/80 backdrop-blur-md border border-white shadow-sm text-slate-800 rounded-[24px] rounded-bl-[8px]'
-                        }`}
+                          }`}
                       >
                         <div className="whitespace-pre-wrap">{msg.content}</div>
                       </div>
@@ -238,7 +237,7 @@ export default function PulsePage() {
                                     {JSON.stringify(args, null, 2)}
                                   </pre>
                                 </div>
-                                
+
                                 {toolConfirmations[toolCallId] ? (
                                   <div className="flex items-center justify-center gap-2 text-emerald-600 bg-emerald-50 px-4 py-3 rounded-xl text-sm font-bold border border-emerald-100">
                                     <CheckCircle2 className="w-5 h-5" /> Executed Successfully
@@ -248,19 +247,19 @@ export default function PulsePage() {
                                     <button
                                       onClick={async () => {
                                         try {
-                                           const enrichedArgs = { 
-                                             ...args, 
-                                             _authMeta: { 
-                                               userEmail: TEST_USER.userEmail, 
-                                               workspaceId: TEST_USER.workspaceId, 
-                                               boardId: TEST_USER.boardId 
-                                             } 
-                                           };
-                                           const res = await executeSkaryaAction(toolName, enrichedArgs);
-                                           setToolConfirmations(prev => ({...prev, [toolCallId]: true}));
-                                           addToolResult({ toolCallId, result: res } as any);
+                                          const enrichedArgs = {
+                                            ...args,
+                                            _authMeta: {
+                                              userEmail: TEST_USER.userEmail,
+                                              workspaceId: TEST_USER.workspaceId,
+                                              boardId: TEST_USER.boardId
+                                            }
+                                          };
+                                          const res = await executeSkaryaAction(toolName, enrichedArgs);
+                                          setToolConfirmations(prev => ({ ...prev, [toolCallId]: true }));
+                                          addToolResult({ toolCallId, result: res } as any);
                                         } catch (e: any) {
-                                           addToolResult({ toolCallId, result: { success: false, error: e.message } } as any);
+                                          addToolResult({ toolCallId, result: { success: false, error: e.message } } as any);
                                         }
                                       }}
                                       className="flex-1 flex items-center justify-center gap-2 bg-indigo-600 text-white px-5 py-3 rounded-xl text-sm font-bold hover:bg-indigo-700 transition-colors shadow-md shadow-indigo-200"
@@ -308,16 +307,16 @@ export default function PulsePage() {
 
               {/* Typing Indicator */}
               {isLoading && messages.length > 0 && messages[messages.length - 1].role !== 'assistant' && (
-                 <div className="flex items-end gap-3 justify-start animate-in fade-in slide-in-from-bottom-2 duration-300">
-                   <div className="flex-shrink-0 w-9 h-9 rounded-[14px] bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-md mb-1 z-10">
-                      <Bot className="w-5 h-5 text-white" />
-                   </div>
-                   <div className="bg-white/80 backdrop-blur-md border border-white shadow-sm rounded-[24px] rounded-bl-[8px] px-5 py-4 flex items-center gap-1.5 h-[52px]">
-                     <div className="w-2 h-2 rounded-full bg-indigo-400 animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                     <div className="w-2 h-2 rounded-full bg-indigo-400 animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                     <div className="w-2 h-2 rounded-full bg-indigo-400 animate-bounce" style={{ animationDelay: '300ms' }}></div>
-                   </div>
-                 </div>
+                <div className="flex items-end gap-3 justify-start animate-in fade-in slide-in-from-bottom-2 duration-300">
+                  <div className="flex-shrink-0 w-9 h-9 rounded-[14px] bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-md mb-1 z-10">
+                    <Bot className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="bg-white/80 backdrop-blur-md border border-white shadow-sm rounded-[24px] rounded-bl-[8px] px-5 py-4 flex items-center gap-1.5 h-[52px]">
+                    <div className="w-2 h-2 rounded-full bg-indigo-400 animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                    <div className="w-2 h-2 rounded-full bg-indigo-400 animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                    <div className="w-2 h-2 rounded-full bg-indigo-400 animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                  </div>
+                </div>
               )}
               <div ref={messagesEndRef} className="h-4" />
             </div>
@@ -385,9 +384,9 @@ export default function PulsePage() {
                       <span className="font-bold text-indigo-900">Today:</span> <span className="text-slate-600">{s.today}</span>
                     </div>
                     {s.blockers && s.blockers !== 'None' && (
-                       <div className="bg-red-50 text-red-700 p-3 rounded-xl border border-red-100 mt-2">
-                         <span className="font-bold flex items-center gap-1"><AlertCircle className="w-4 h-4"/> Blockers:</span> {s.blockers}
-                       </div>
+                      <div className="bg-red-50 text-red-700 p-3 rounded-xl border border-red-100 mt-2">
+                        <span className="font-bold flex items-center gap-1"><AlertCircle className="w-4 h-4" /> Blockers:</span> {s.blockers}
+                      </div>
                     )}
                   </div>
                 ))
