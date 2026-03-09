@@ -45,8 +45,8 @@ export async function POST(req: Request) {
     // 3. Context Builder Layer
     // We enforce a strict max budget to prevent the token limit burst
     const controlledMessages = buildTokenControlledContext(messages, {
-      historyLimit: 8,
-      systemPromptTokensEstimate: 500
+      historyLimit: 6, // Increased to support multi-turn standup interviewing
+      systemPromptTokensEstimate: 400
     });
 
     // 4. Agent Engine Layer
@@ -56,7 +56,8 @@ export async function POST(req: Request) {
       boardId,
       workspaceId,
       userEmail,
-      intentContextStr
+      intentContextStr,
+      intentResult.intent
     );
 
     // 5. Stream Output

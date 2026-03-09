@@ -158,6 +158,208 @@ export class TaskReader {
     }
 
     /**
+     * Agent Tool: Board Health Analytics.
+     * Scans the full board for overdue tasks, stuck items, and unassigned work.
+     */
+    static async getBoardHealth(boardId: string, workspaceId: string) {
+        const response = await skaryaClient.get<any>('/api/boardTask/getBoardTask', { boardId, workspaceId });
+        if (!response.success || !response.data) throw new Error('Failed to fetch board tasks');
+        const allTasks: SkaryaTask[] = Array.isArray(response.data) ? response.data : ((response.data as any)?.tasks || []);
+
+        const now = new Date();
+        const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+        const overdue = allTasks.filter(t => {
+            if (t.status === 'Done' || t.statusCategory === 'completed') return false;
+            return t.dueDate && new Date(t.dueDate) < now;
+        });
+
+        const stuckInProgress = allTasks.filter(t => {
+            if (t.statusCategory !== 'in_progress') return false;
+            return t.startDate && new Date(t.startDate) < sevenDaysAgo;
+        });
+
+        const noAssignee = allTasks.filter(t => {
+            if (t.status === 'Done' || t.statusCategory === 'completed') return false;
+            return !t.assigneePrimary || !t.assigneePrimary.email;
+        });
+
+        const dueSoon = allTasks.filter(t => {
+            if (t.status === 'Done' || t.statusCategory === 'completed') return false;
+            if (!t.dueDate) return false;
+            const due = new Date(t.dueDate);
+            const twoDaysFromNow = new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000);
+            return due >= now && due <= twoDaysFromNow;
+        });
+
+        return {
+            totalTasks: allTasks.length,
+            activeTasks: allTasks.filter(t => t.statusCategory !== 'completed').length,
+            overdue: overdue.slice(0, 10).map(t => ({ id: t._id, name: t.name, dueDate: t.dueDate, assignee: t.assigneePrimary?.name })),
+            stuckInProgress: stuckInProgress.slice(0, 10).map(t => ({ id: t._id, name: t.name, startDate: t.startDate, assignee: t.assigneePrimary?.name })),
+            noAssignee: noAssignee.slice(0, 10).map(t => ({ id: t._id, name: t.name })),
+            dueSoon: dueSoon.slice(0, 10).map(t => ({ id: t._id, name: t.name, dueDate: t.dueDate, assignee: t.assigneePrimary?.name }))
+        };
+    }
+
+    /**
+     * Agent Tool: Get all team tasks (read-only, no user filtering).
+     * Used for dependency detection in standup.
+     */
+    static async getTeamTasks(boardId: string, workspaceId: string, limit: number = 10) {
+        const response = await skaryaClient.get<any>('/api/boardTask/getBoardTask', { boardId, workspaceId });
+        if (!response.success || !response.data) throw new Error('Failed to fetch board tasks');
+        const allTasks: SkaryaTask[] = Array.isArray(response.data) ? response.data : ((response.data as any)?.tasks || []);
+
+        const activeTasks = allTasks.filter(t => t.statusCategory !== 'completed');
+        return activeTasks.slice(0, limit).map(t => ({
+            id: t._id,
+            name: t.name,
+            status: t.status,
+            assignee: t.assigneePrimary?.name || 'Unassigned',
+            priority: t.priority,
+            dueDate: t.dueDate
+        }));
+    }
+
+    /**
+     * Agent Tool: Get task comments.
+     * Guesses endpoint based on Skarya naming conventions.
+     */
+    static async getTaskComments(taskId: string): Promise<any[]> {
+        try {
+            const response = await skaryaClient.get<any[]>('/api/boardTaskComment/getBoardTaskComment', { taskId });
+            return response.success && Array.isArray(response.data) ? response.data : [];
+        } catch (e) {
+            console.error('[TaskReader] getTaskComments failed:', e);
+            return [];
+        }
+    }
+
+    /**
+     * Agent Tool: Sprint Intelligence.
+     * Aggregates metrics for the current board state.
+     */
+    static async getSprintMetrics(boardId: string, workspaceId: string) {
+        const response = await skaryaClient.get<any>('/api/boardTask/getBoardTask', { boardId, workspaceId });
+        if (!response.success || !response.data) throw new Error('Failed to fetch board tasks');
+        const allTasks: SkaryaTask[] = Array.isArray(response.data) ? response.data : ((response.data as any)?.tasks || []);
+
+        const stats = {
+            total: allTasks.length,
+            completed: allTasks.filter(t => t.statusCategory === 'completed').length,
+            inProgress: allTasks.filter(t => t.statusCategory === 'in_progress').length,
+            notStarted: allTasks.filter(t => t.statusCategory === 'not_started').length,
+            highPriority: allTasks.filter(t => (t.priority === 'High' || t.priority === 'Critical') && t.statusCategory !== 'completed').length
+        };
+
+        return {
+            ...stats,
+            completionRate: stats.total > 0 ? (stats.completed / stats.total) * 100 : 0
+        };
+    }
+
+    /**
+     * Agent Tool: Detect stuck tasks (no movement for X days).
+     */
+    static async detectStuckTasks(boardId: string, workspaceId: string, daysThreshold: number = 7) {
+        const response = await skaryaClient.get<any>('/api/boardTask/getBoardTask', { boardId, workspaceId });
+        if (!response.success || !response.data) throw new Error('Failed to fetch board tasks');
+        const allTasks: SkaryaTask[] = Array.isArray(response.data) ? response.data : ((response.data as any)?.tasks || []);
+
+        const thresholdDate = new Date();
+        thresholdDate.setDate(thresholdDate.getDate() - daysThreshold);
+
+        const stuckTasks = allTasks.filter(t => {
+            if (t.statusCategory === 'completed') return false;
+            // Assuming startDate is the last movement indicator if updatedAt isn't available
+            const lastActive = t.startDate ? new Date(t.startDate) : new Date(0);
+            return lastActive < thresholdDate;
+        });
+
+        return stuckTasks.slice(0, 10).map(t => ({
+            id: t._id,
+            name: t.name,
+            assignee: t.assigneePrimary?.name || 'Unassigned',
+            status: t.status,
+            lastActive: t.startDate
+        }));
+    }
+
+    /**
+     * Agent Tool: Predict deadline risks.
+     */
+    static async predictDeadlineRisks(boardId: string, workspaceId: string) {
+        const response = await skaryaClient.get<any>('/api/boardTask/getBoardTask', { boardId, workspaceId });
+        if (!response.success || !response.data) throw new Error('Failed to fetch board tasks');
+        const allTasks: SkaryaTask[] = Array.isArray(response.data) ? response.data : ((response.data as any)?.tasks || []);
+
+        const now = new Date();
+        const nextWeek = new Date();
+        nextWeek.setDate(now.getDate() + 7);
+
+        const risks = allTasks.filter(t => {
+            if (t.statusCategory === 'completed') return false;
+            if (!t.dueDate) return false;
+            const due = new Date(t.dueDate);
+            // Risk if due within 7 days and still not started/low percentage
+            return due < nextWeek && (t.statusCategory === 'not_started' || t.percentageCompletion < 50);
+        });
+
+        return risks.slice(0, 10).map(t => ({
+            id: t._id,
+            name: t.name,
+            dueDate: t.dueDate,
+            completion: t.percentageCompletion,
+            assignee: t.assigneePrimary?.name
+        }));
+    }
+
+    /**
+     * Agent Tool: Search all board tasks (global search).
+     */
+    static async searchAllBoardTasks(boardId: string, workspaceId: string, query: string) {
+        const response = await skaryaClient.get<any>('/api/boardTask/getBoardTask', { boardId, workspaceId });
+        if (!response.success || !response.data) throw new Error('Failed to fetch board tasks');
+        const allTasks: SkaryaTask[] = Array.isArray(response.data) ? response.data : ((response.data as any)?.tasks || []);
+
+        const lowerQuery = query.toLowerCase();
+        const results = allTasks.filter(t =>
+            t.name.toLowerCase().includes(lowerQuery) ||
+            (t as any).description?.toLowerCase().includes(lowerQuery)
+        );
+
+        return results.slice(0, 15).map(t => ({
+            id: t._id,
+            name: t.name,
+            status: t.status,
+            assignee: t.assigneePrimary?.name
+        }));
+    }
+
+    /**
+     * Agent Tool: Get my overdue tasks.
+     */
+    static async getMyOverdueTasks(boardId: string, workspaceId: string, userEmail: string) {
+        const response = await skaryaClient.get<any>('/api/boardTask/getBoardTask', { boardId, workspaceId });
+        const allTasks: SkaryaTask[] = Array.isArray(response.data) ? response.data : ((response.data as any)?.tasks || []);
+
+        const now = new Date();
+        const myOverdue = allTasks.filter(t => {
+            const isMine = JSON.stringify(t).toLowerCase().includes(userEmail.toLowerCase());
+            if (!isMine || t.statusCategory === 'completed') return false;
+            return t.dueDate && new Date(t.dueDate) < now;
+        });
+
+        return myOverdue.map(t => ({
+            id: t._id,
+            name: t.name,
+            dueDate: t.dueDate,
+            status: t.status
+        }));
+    }
+
+    /**
      * Verifies if a user has access to a specific board.
      */
     static async verifyBoardAccess(boardId: string, userEmail: string): Promise<boolean> {
@@ -169,3 +371,4 @@ export class TaskReader {
         return response.success;
     }
 }
+

@@ -8,6 +8,7 @@ export interface IStandup extends Document {
     yesterday: string;
     today: string;
     blockers: string;
+    summary?: string;
     createdAt: Date;
 }
 
@@ -19,6 +20,7 @@ const StandupSchema: Schema = new Schema({
     yesterday: { type: String, required: true },
     today: { type: String, required: true },
     blockers: { type: String, default: 'None' },
+    summary: { type: String, default: '' },
     createdAt: { type: Date, default: Date.now },
 });
 

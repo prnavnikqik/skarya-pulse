@@ -52,7 +52,7 @@ export class TaskWriter {
         return results;
     }
 
-    private static async updateTaskStatus(update: TaskUpdate): Promise<WritebackResult> {
+    public static async updateTaskStatus(update: TaskUpdate): Promise<WritebackResult> {
         try {
             // Inferred endpoint from HAR reference for updating task: PATCH /api/boardTask/updateBoardTask
             const response = await skaryaClient.patch(`/api/boardTask/updateBoardTask?id=${update._id}`, {
@@ -70,14 +70,14 @@ export class TaskWriter {
         }
     }
 
-    private static async addTaskComment(comment: TaskComment, label: string): Promise<WritebackResult> {
+    public static async addTaskComment(comment: TaskComment, label: string): Promise<WritebackResult> {
         try {
-            // Inferred endpoint from HAR reference for commenting: POST /api/boardTaskComment/addBoardTaskComment
-            // In a real app we'd need workspaceId and boardId from context, 
-            // but for prototype we assume the API handles it or we'd pass it down.
-            const response = await skaryaClient.post(`/api/boardTaskComment/addBoardTaskComment`, {
-                taskId: comment.taskId,
-                text: `**${label}:** ${comment.comment}`
+            // Updated endpoint from HAR: POST /api/boardTaskComment/createBoardTaskComment
+            const response = await skaryaClient.post(`/api/boardTaskComment/createBoardTaskComment`, {
+                boardTaskId: comment.taskId,
+                text: `**${label}:** ${comment.comment}`,
+                isEdited: false,
+                isRoadBlock: label === 'Blocker'
             });
 
             if (response.success) {
@@ -89,7 +89,51 @@ export class TaskWriter {
         }
     }
 
-    private static async createTask(task: NewTask): Promise<WritebackResult> {
+    public static async updateTaskPriority(taskId: string, taskNumber: string, priority: string): Promise<WritebackResult> {
+        try {
+            const response = await skaryaClient.patch(`/api/boardTask/updateBoardTask?id=${taskId}`, {
+                priority
+            });
+            if (response.success) {
+                return { operation: `Update Priority ${taskNumber} to ${priority}`, status: 'success' };
+            }
+            return { operation: `Update Priority ${taskNumber}`, status: 'failed', error: response.message };
+        } catch (e: any) {
+            return { operation: `Update Priority ${taskNumber}`, status: 'failed', error: e.message };
+        }
+    }
+
+    public static async setTaskDates(taskId: string, taskNumber: string, startDate?: string, dueDate?: string): Promise<WritebackResult> {
+        try {
+            const payload: any = {};
+            if (startDate) payload.startDate = startDate;
+            if (dueDate) payload.dueDate = dueDate;
+
+            const response = await skaryaClient.patch(`/api/boardTask/updateBoardTask?id=${taskId}`, payload);
+            if (response.success) {
+                return { operation: `Update Dates ${taskNumber}`, status: 'success' };
+            }
+            return { operation: `Update Dates ${taskNumber}`, status: 'failed', error: response.message };
+        } catch (e: any) {
+            return { operation: `Update Dates ${taskNumber}`, status: 'failed', error: e.message };
+        }
+    }
+
+    public static async assignTask(taskId: string, taskNumber: string, assigneeEmail: string): Promise<WritebackResult> {
+        try {
+            const response = await skaryaClient.patch(`/api/boardTask/updateBoardTask?id=${taskId}`, {
+                assigneePrimary: assigneeEmail
+            });
+            if (response.success) {
+                return { operation: `Assign ${taskNumber} to ${assigneeEmail}`, status: 'success' };
+            }
+            return { operation: `Assign ${taskNumber}`, status: 'failed', error: response.message };
+        } catch (e: any) {
+            return { operation: `Assign ${taskNumber}`, status: 'failed', error: e.message };
+        }
+    }
+
+    public static async createTask(task: NewTask): Promise<WritebackResult> {
         try {
             // Extracted from pulse.karyaa.ai dataagent schema
             const endpoint = `/api/boardTask/createBoardTask?boardId=${task.boardId}&workspaceId=${task.workspaceId}`;
@@ -143,7 +187,7 @@ export class TaskWriter {
         }
     }
 
-    private static async createSubtask(subtask: NewSubtask): Promise<WritebackResult> {
+    public static async createSubtask(subtask: NewSubtask): Promise<WritebackResult> {
         try {
             const endpoint = `/api/boardSubtask/createBoardSubtask`;
             const payload = {
