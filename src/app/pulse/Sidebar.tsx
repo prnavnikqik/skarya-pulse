@@ -68,25 +68,10 @@ export const Sidebar = ({
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
             <span className="nl">Ask Pulse</span>
           </div>
-          <div style={{ paddingLeft: '40px', paddingRight: '12px', marginBottom: '8px' }}>
-             {!isSidebarCollapsed && pastChats && pastChats.filter((c: any) => !c.type || c.type === 'chat').slice(0, 5).map((chat: any) => (
-               <div key={chat.chatId} onClick={() => loadChat(chat.chatId)} className="text-[11px] font-medium text-slate-400 hover:text-indigo-500 cursor-pointer truncate py-1 transition-colors">
-                 • {chat.title}
-               </div>
-             ))}
-          </div>
-
           <div className={`ni ${activeView === 'standup' || activeView === 'standup-chat' ? 'act' : ''}`} data-tip="Daily Standup" onClick={() => navTo('standup')}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
             <span className="nl">Daily Standup</span>
             <span className="badge bam">Today</span>
-          </div>
-          <div style={{ paddingLeft: '40px', paddingRight: '12px', marginBottom: '8px' }}>
-             {!isSidebarCollapsed && pastChats && pastChats.filter((c: any) => c.type === 'standup').slice(0, 5).map((chat: any) => (
-               <div key={chat.chatId} onClick={() => loadChat(chat.chatId)} className="text-[11px] font-medium text-slate-400 hover:text-indigo-500 cursor-pointer truncate py-1 transition-colors">
-                 • {chat.title}
-               </div>
-             ))}
           </div>
           <div className={`ni ${activeView === 'summaries' ? 'act' : ''}`} data-tip="Summaries" onClick={() => navTo('summaries')}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
@@ -104,6 +89,17 @@ export const Sidebar = ({
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
             <span className="nl">Blocker Radar</span>
           </div>
+          {pastChats && pastChats.length > 0 && (
+            <>
+              <div className="slbl">Recent</div>
+              {pastChats.slice(0, 5).map((chat: any) => (
+                <div key={chat.chatId} className="hi" data-tip={chat.title} onClick={() => loadChat(chat.chatId)}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                  <span>{chat.title} · {new Date(chat.createdAt).getDate()} {new Date(chat.createdAt).toLocaleString('default', { month: 'short' })}</span>
+                </div>
+              ))}
+            </>
+          )}
         </div>
         <div className="ubottom">
           <div className="ucard">

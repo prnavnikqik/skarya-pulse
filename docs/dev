@@ -9,7 +9,6 @@ Gemini SDK – imported and ready to use.
 Clean UI – glass‑morphic design, micro‑animations, and a premium look.	
 🎯 Possible Next Steps
 Feature	What It Does	Rough Effort
-Model‑specific tool prompts	Use Gemini for summarization/report generation, Claude for task creation/updates, etc., by routing the tool’s execution to the selected model automatically.	Small (add conditional prompts).
 Persist daily stand‑up data	Store each stand‑up entry in a new standups collection (MongoDB) and expose CRUD API routes (/api/standup).	Medium (schema + endpoints + UI).
 New AI tools	• draft_document – generate PRDs, docs.
 • summarize_thread – TL;DR of task comments.
@@ -17,4 +16,3 @@ New AI tools	• draft_document – generate PRDs, docs.
 Enhanced UI/UX	Add loading skeletons, refine micro‑animations, dark‑mode toggle, improve accessibility.	Small‑medium.
 Deployable production build	Dockerfile, CI/CD pipeline, environment variable handling for Atlas, TLS.	Medium.
 Testing suite	Jest + Supertest for API routes, unit tests for tool logic.	Small‑medium.
-📋 What Should We Do First?
