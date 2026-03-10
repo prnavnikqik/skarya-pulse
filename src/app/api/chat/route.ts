@@ -5,13 +5,23 @@ import { google } from '@ai-sdk/google';
 import { analyzeIntent } from '@/ai/intent';
 import { buildTokenControlledContext } from '@/ai/context';
 import { runAgentEngine } from '@/ai/agent-engine';
+import mongoose from 'mongoose';
+import ChatSession from '@/models/ChatSession';
+
+// MongoDB connection
+const MONGODB_URI = process.env.MONGODB_URI!;
+async function connectToDatabase() {
+  if (mongoose.connection.readyState >= 1) return;
+  await mongoose.connect(MONGODB_URI);
+}
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
 export async function POST(req: Request) {
   try {
-    const { messages, workspaceId, boardId, userEmail, modelId } = await req.json();
+    await connectToDatabase();
+    const { messages, workspaceId, boardId, userEmail, modelId, chatId } = await req.json();
 
     if (!workspaceId || !boardId || !userEmail) {
       return new Response('Missing Context', { status: 400 });
@@ -64,7 +74,9 @@ export async function POST(req: Request) {
       workspaceId,
       userEmail,
       intentContextStr,
-      intentResult.intent
+      intentResult.intent,
+      chatId,
+      messages // original raw messages
     );
 
     // 5. Stream Output

@@ -3,7 +3,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useChat } from '@ai-sdk/react';
 import { executeSkaryaAction } from '@/app/actions';
-import { Brain, Sparkles, Send, CheckCircle2, XCircle, Bot, User, Loader2, AlertCircle, ChevronDown, History } from 'lucide-react';
+import { Brain, Sparkles, Send, CheckCircle2, XCircle, Bot, User, Loader2, AlertCircle, ChevronDown, History, MessageSquare, Plus } from 'lucide-react';
+import { v4 as uuidv4 } from 'uuid';
 
 // Hardcoded for demo/staging testing against pulse.karyaa.ai
 const TEST_USER = {
@@ -45,18 +46,41 @@ const AVAILABLE_MODELS = [
 
 export default function PulsePage() {
   const [selectedModel, setSelectedModel] = useState(AVAILABLE_MODELS[0].id);
-  const [showStandups, setShowStandups] = useState(false);
-  const [pastStandups, setPastStandups] = useState([]);
+  const [showHistory, setShowHistory] = useState(false);
+  const [pastChats, setPastChats] = useState<any[]>([]);
+  const [chatId, setChatId] = useState<string>('');
 
-  const fetchStandups = async () => {
+  useEffect(() => {
+    // Initialize a new chat session ID on mount
+    setChatId(uuidv4());
+  }, []);
+
+  const fetchChats = async () => {
     try {
-      const res = await fetch(`/api/standups?userEmail=${TEST_USER.userEmail}&boardId=${TEST_USER.boardId}`);
+      const res = await fetch(`/api/chats?userEmail=${TEST_USER.userEmail}&workspaceId=${TEST_USER.workspaceId}`);
       const data = await res.json();
       if (data.success) {
-        setPastStandups(data.standups);
-        setShowStandups(true);
+        setPastChats(data.sessions);
+        setShowHistory(true);
       }
-    } catch (e) { console.error('Failed to fetch standups', e); }
+    } catch (e) { console.error('Failed to fetch chats', e); }
+  };
+
+  const loadChat = async (id: string) => {
+    try {
+      const res = await fetch(`/api/chats/${id}`);
+      const data = await res.json();
+      if (data.success) {
+        setChatId(id);
+        setMessages(data.messages || []);
+        setShowHistory(false);
+      }
+    } catch (e) { console.error('Failed to load chat', e); }
+  };
+
+  const startNewChat = () => {
+    setChatId(uuidv4());
+    setMessages([]);
   };
 
   const [localInput, setLocalInput] = useState('');
@@ -66,6 +90,7 @@ export default function PulsePage() {
     status,
     error,
     append,
+    setMessages,
     addToolResult
   } = useChat({
     api: '/api/chat',
@@ -73,7 +98,8 @@ export default function PulsePage() {
       workspaceId: TEST_USER.workspaceId,
       boardId: TEST_USER.boardId,
       userEmail: TEST_USER.userEmail,
-      modelId: selectedModel
+      modelId: selectedModel,
+      chatId: chatId
     },
     maxSteps: 7, // Matches agent-engine for multi-step reasoning
   } as any) as any;
@@ -134,7 +160,12 @@ export default function PulsePage() {
             <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-indigo-500 pointer-events-none" />
           </div>
 
-          <div className="flex items-center gap-2 bg-white/50 border border-indigo-50 px-4 py-2 rounded-full shadow-sm hover:bg-white transition-all cursor-pointer text-slate-600 hover:text-indigo-600" onClick={fetchStandups}>
+          <div className="flex items-center gap-2 bg-white/50 border border-indigo-50 px-4 py-2 rounded-full shadow-sm hover:bg-white transition-all cursor-pointer text-slate-600 hover:text-indigo-600" onClick={startNewChat} title="New Chat">
+            <Plus className="w-4 h-4" />
+            <span className="text-xs font-semibold hidden md:inline">New</span>
+          </div>
+
+          <div className="flex items-center gap-2 bg-white/50 border border-indigo-50 px-4 py-2 rounded-full shadow-sm hover:bg-white transition-all cursor-pointer text-slate-600 hover:text-indigo-600" onClick={fetchChats}>
             <History className="w-4 h-4" />
             <span className="text-xs font-semibold">History</span>
           </div>
@@ -377,41 +408,33 @@ export default function PulsePage() {
         </div>
       )}
 
-      {/* Past Standups Modal */}
-      {showStandups && (
+      {/* Past Chats Modal */}
+      {showHistory && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-opacity">
           <div className="bg-white rounded-3xl w-full max-w-2xl max-h-[80vh] flex flex-col shadow-2xl animate-in slide-in-from-bottom-4 duration-300">
             <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 rounded-t-3xl">
               <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
                 <History className="w-5 h-5 text-indigo-500" />
-                Past Standups
+                Chat History
               </h2>
-              <button onClick={() => setShowStandups(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
+              <button onClick={() => setShowHistory(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
                 <XCircle className="w-6 h-6" />
               </button>
             </div>
             <div className="p-6 overflow-y-auto custom-scrollbar flex-1 space-y-4">
-              {pastStandups.length === 0 ? (
-                <div className="text-center text-slate-500 py-10">No past standups recorded yet.</div>
+              {pastChats.length === 0 ? (
+                <div className="text-center text-slate-500 py-10">No chat history recorded yet.</div>
               ) : (
-                pastStandups.map((s: any, i) => (
-                  <div key={i} className="bg-white border text-sm border-slate-200 rounded-2xl p-5 shadow-sm space-y-3 relative overflow-hidden">
-                    <div className="absolute top-0 left-0 w-1 h-full bg-indigo-500"></div>
+                pastChats.map((chat: any, i) => (
+                  <button key={i} onClick={() => loadChat(chat.chatId)} className="w-full text-left bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-3 relative overflow-hidden transition-all hover:border-indigo-300 hover:shadow-md group">
+                    <div className="absolute top-0 left-0 w-1 h-full bg-slate-200 group-hover:bg-indigo-500 transition-colors"></div>
                     <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-                      {new Date(s.createdAt).toLocaleDateString()} at {new Date(s.createdAt).toLocaleTimeString()}
+                      {new Date(chat.createdAt).toLocaleDateString()} at {new Date(chat.createdAt).toLocaleTimeString()}
                     </div>
                     <div>
-                      <span className="font-bold text-indigo-900">Yesterday:</span> <span className="text-slate-600">{s.yesterday}</span>
+                      <span className="font-bold text-indigo-900 group-hover:text-indigo-600 transition-colors">{chat.title}</span>
                     </div>
-                    <div>
-                      <span className="font-bold text-indigo-900">Today:</span> <span className="text-slate-600">{s.today}</span>
-                    </div>
-                    {s.blockers && s.blockers !== 'None' && (
-                      <div className="bg-red-50 text-red-700 p-3 rounded-xl border border-red-100 mt-2">
-                        <span className="font-bold flex items-center gap-1"><AlertCircle className="w-4 h-4" /> Blockers:</span> {s.blockers}
-                      </div>
-                    )}
-                  </div>
+                  </button>
                 ))
               )}
             </div>
