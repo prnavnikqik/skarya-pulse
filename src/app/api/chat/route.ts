@@ -1,6 +1,7 @@
 import { groq } from '@ai-sdk/groq';
 import { anthropic } from '@ai-sdk/anthropic';
 import { google } from '@ai-sdk/google';
+import { openai } from '@ai-sdk/openai';
 
 import { analyzeIntent } from '@/ai/intent';
 import { buildTokenControlledContext } from '@/ai/context';
@@ -40,6 +41,8 @@ export async function POST(req: Request) {
       selectedModel = anthropic(modelId);
     } else if (modelId?.startsWith('gemini')) {
       selectedModel = google(modelId);
+    } else if (modelId?.startsWith('gpt') || modelId?.startsWith('o1') || modelId?.startsWith('o3')) {
+      selectedModel = openai(modelId);
     } else {
       selectedModel = groq(modelId || 'llama-3.3-70b-versatile');
     }

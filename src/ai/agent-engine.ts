@@ -60,12 +60,15 @@ export async function runAgentEngine(
                 await ChatSession.findOneAndUpdate(
                     { chatId },
                     {
-                        userEmail,
-                        workspaceId,
-                        boardId,
-                        title,
-                        type: chatType || 'chat',
-                        $set: { messages: [...rawMessages, ...event.response.messages] }
+                        $set: {
+                            userEmail,
+                            workspaceId,
+                            boardId,
+                            title,
+                            type: chatType || 'chat',
+                            messages: [...rawMessages, ...event.response.messages],
+                            updatedAt: new Date()
+                        }
                     },
                     { upsert: true, new: true, setDefaultsOnInsert: true }
                 );

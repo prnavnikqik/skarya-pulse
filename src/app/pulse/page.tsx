@@ -18,32 +18,23 @@ const TEST_USER = {
 };
 
 const AVAILABLE_MODELS = [
+  // GROQ (Verified Working)
+  { id: 'llama-3.3-70b-versatile', name: 'Llama 3.3 70B', badge: 'FAST', color: '#ec4899' },
+  { id: 'llama3-70b-8192', name: 'Llama 3 70B', badge: '', color: '#ec4899' },
+  { id: 'mixtral-8x7b-32768', name: 'Mixtral 8x7B', badge: '', color: '#ec4899' },
+
   // OPENAI
   { id: 'gpt-4o', name: 'GPT-4o', badge: '', color: '#10a37f' },
   { id: 'gpt-4o-mini', name: 'GPT-4o Mini', badge: '', color: '#10a37f' },
   { id: 'o1', name: 'o1', badge: '', color: '#10a37f' },
-  { id: 'o3-mini', name: 'o3-mini', badge: '', color: '#10a37f' },
 
   // ANTHROPIC
   { id: 'claude-3-7-sonnet-20250219', name: 'Claude 3.7 Sonnet', badge: '', color: '#8b5cf6' },
-  { id: 'claude-3-5-sonnet-latest', name: 'Claude 3.5 Sonnet', badge: '', color: '#8b5cf6' },
-  { id: 'claude-3-5-haiku-latest', name: 'Claude 3.5 Haiku', badge: '', color: '#8b5cf6' },
-  { id: 'claude-3-opus-latest', name: 'Claude 3 Opus', badge: '', color: '#8b5cf6' },
+  { id: 'claude-3-5-sonnet-latest', name: 'Claude 3.5 Sonnet', badge: 'BEST', color: '#8b5cf6' },
 
   // GEMINI
-  { id: 'gemini-3.0-pro', name: 'Gemini 3 Pro', badge: '', color: '#3b82f6' },
-  { id: 'gemini-3.0-flash', name: 'Gemini 3 Flash', badge: '', color: '#3b82f6' },
-  { id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro', badge: '', color: '#3b82f6' },
-  { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash', badge: '', color: '#3b82f6' },
-  { id: 'gemini-2.5-flash-lite', name: 'Gemini 2.5 Flash-Lite', badge: '', color: '#3b82f6' },
   { id: 'gemini-2.0-flash-exp', name: 'Gemini 2.0 Flash', badge: '', color: '#3b82f6' },
   { id: 'gemini-1.5-pro-latest', name: 'Gemini 1.5 Pro', badge: '', color: '#3b82f6' },
-
-  // GROQ
-  { id: 'llama-3.3-70b-versatile', name: 'Llama 3.3 70B', badge: '', color: '#ec4899' },
-  { id: 'llama3-70b-8192', name: 'Llama 3 70B', badge: '', color: '#ec4899' },
-  { id: 'llama3-8b-8192', name: 'Llama 3 8B', badge: '', color: '#ec4899' },
-  { id: 'mixtral-8x7b-32768', name: 'Mixtral 8x7B', badge: '', color: '#ec4899' },
 ];
 
 export default function PulsePage() {
@@ -89,13 +80,11 @@ export default function PulsePage() {
       const data = await res.json();
       if (data.success) {
         if (data.type === 'standup') {
-          console.log("Loading STANDUP:", data);
           setStandupChatId(id);
           setStandupMsgs(data.messages || []);
           setActiveCtx('standup');
           navTo('standup-chat');
         } else {
-          console.log("Loading HOME:", data);
           setHomeChatId(id);
           setHomeMsgs(data.messages || []);
           setActiveCtx('home');
@@ -110,14 +99,20 @@ export default function PulsePage() {
     id: 'home',
     api: '/api/chat',
     body: { ...TEST_USER, modelId: selectedModel.id, chatId: homeChatId, chatType: 'chat' },
-    maxSteps: 7
+    maxSteps: 7,
+    onFinish: () => {
+      loadChatHistory();
+    }
   } as any);
 
   const { messages: standupMsgs, status: standupStatus, setMessages: setStandupMsgs, append: appendStandup, addToolResult: authToolResStandup } = useChat({
     id: 'standup',
     api: '/api/chat',
     body: { ...TEST_USER, modelId: selectedModel.id, chatId: standupChatId, chatType: 'standup' },
-    maxSteps: 7
+    maxSteps: 7,
+    onFinish: () => {
+      loadChatHistory();
+    }
   } as any);
 
   const isLoading = homeStatus === 'submitted' || homeStatus === 'streaming' || standupStatus === 'submitted' || standupStatus === 'streaming';

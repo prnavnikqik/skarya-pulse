@@ -62,27 +62,84 @@ export const StandupHistoryLayout = ({ startStandup, pastStandups, loadChat }: a
       <button className="stbtn" onClick={startStandup}>Start Standup →</button>
     </div>
     
-    <div style={{ marginTop: '32px' }}>
-      <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--a)' }}>Past Standups</h3>
+    <div style={{ marginTop: '40px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+        <h3 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--a)', letterSpacing: '-0.5px' }}>Past Standup History</h3>
+        <div style={{ fontSize: '12px', color: 'var(--mu)', fontWeight: 500 }}>{pastStandups?.length || 0} Sessions recorded</div>
+      </div>
+      
       {pastStandups && pastStandups.length > 0 ? (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px', marginTop: '16px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px' }}>
           {pastStandups.map((s: any) => (
              <div 
                key={s.chatId} 
                onClick={() => loadChat(s.chatId)} 
-               style={{ padding: '16px', background: '#fff', border: '1px solid var(--bd)', borderRadius: '12px', cursor: 'pointer', transition: 'all 0.2s ease', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}
-               onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--lbl)'}
-               onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--bd)'}
+               style={{ 
+                 padding: '20px', 
+                 background: '#fff', 
+                 border: '1px solid var(--bd)', 
+                 borderRadius: '16px', 
+                 cursor: 'pointer', 
+                 transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)', 
+                 boxShadow: '0 2px 10px rgba(0,0,0,0.03)',
+                 display: 'flex',
+                 flexDirection: 'column',
+                 gap: '12px',
+                 position: 'relative',
+                 overflow: 'hidden'
+               }}
+               onMouseEnter={(e) => {
+                 e.currentTarget.style.borderColor = 'var(--a)';
+                 e.currentTarget.style.transform = 'translateY(-3px)';
+                 e.currentTarget.style.boxShadow = '0 10px 25px rgba(91, 94, 244, 0.08)';
+               }}
+               onMouseLeave={(e) => {
+                 e.currentTarget.style.borderColor = 'var(--bd)';
+                 e.currentTarget.style.transform = 'translateY(0)';
+                 e.currentTarget.style.boxShadow = '0 2px 10px rgba(0,0,0,0.03)';
+               }}
              >
-               <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--lbl)', textTransform: 'uppercase', marginBottom: '8px' }}>
-                 {new Date(s.createdAt).toLocaleDateString()} at {new Date(s.createdAt).toLocaleTimeString()}
+               <div style={{ 
+                 position: 'absolute', 
+                 top: 0, 
+                 right: 0, 
+                 width: '4px', 
+                 height: '100%', 
+                 background: 'linear-gradient(to bottom, var(--a), var(--a2))',
+                 opacity: 0.8
+               }} />
+               
+               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                 <div style={{ padding: '6px', borderRadius: '8px', background: 'rgba(91, 94, 244, 0.06)', color: 'var(--a)' }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                 </div>
+                 <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--mu)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                   {new Date(s.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                 </div>
                </div>
-               <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--a)' }}>{s.title}</div>
+
+               <div style={{ fontSize: '15px', fontWeight: 600, color: '#111', lineHeight: '1.4' }}>{s.title}</div>
+               
+               <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'var(--su)' }}>
+                 <span>{new Date(s.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                 <span style={{ opacity: 0.3 }}>•</span>
+                 <span style={{ color: 'var(--a)', fontWeight: 600 }}>Review Standup →</span>
+               </div>
              </div>
           ))}
         </div>
       ) : (
-        <div style={{ marginTop: '16px', fontSize: '13px', color: 'var(--su)' }}>No past standup history available yet.</div>
+        <div style={{ 
+          padding: '40px', 
+          textAlign: 'center', 
+          background: 'rgba(255,255,255,0.5)', 
+          border: '2px dashed var(--bd)', 
+          borderRadius: '20px',
+          color: 'var(--su)'
+        }}>
+          <div style={{ fontSize: '14px', fontWeight: 600 }}>No past standup history available yet.</div>
+          <div style={{ fontSize: '12px', color: 'var(--mu)', marginTop: '4px' }}>Complete your first daily standup to see it here.</div>
+        </div>
       )}
     </div>
   </div>

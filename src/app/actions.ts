@@ -58,6 +58,8 @@ export async function executeSkaryaAction(toolName: string, args: Record<string,
       return { success: true, results: res };
     }
 
+    const authMeta = args._authMeta as { userEmail: string, workspaceId: string, boardId: string } | undefined;
+
     if (toolName === 'create_task') {
       const res = await TaskWriter.applyUpdates({
         task_updates: [],
@@ -67,8 +69,8 @@ export async function executeSkaryaAction(toolName: string, args: Record<string,
         relations_to_add: [],
         new_tasks_to_create: [{
           ...(args as Record<string, unknown> as any),
-          boardId: args.boardId ? String(args.boardId) : '69a2118ecf1d73e568280ba5', // Staging default
-          workspaceId: args.workspaceId ? String(args.workspaceId) : '69a202afcf1d73e568280529' // Staging default
+          boardId: args.boardId ? String(args.boardId) : (authMeta?.boardId || '69a2118ecf1d73e568280ba5'),
+          workspaceId: args.workspaceId ? String(args.workspaceId) : (authMeta?.workspaceId || '69a202afcf1d73e568280529')
         }],
         new_subtasks_to_create: [],
         notifications_to_send: [],
@@ -87,8 +89,8 @@ export async function executeSkaryaAction(toolName: string, args: Record<string,
         new_tasks_to_create: [],
         new_subtasks_to_create: [{
           ...(args as Record<string, unknown> as any),
-          boardId: args.boardId ? String(args.boardId) : '69a2118ecf1d73e568280ba5', // Staging default
-          workspaceId: args.workspaceId ? String(args.workspaceId) : '69a202afcf1d73e568280529' // Staging default
+          boardId: args.boardId ? String(args.boardId) : (authMeta?.boardId || '69a2118ecf1d73e568280ba5'),
+          workspaceId: args.workspaceId ? String(args.workspaceId) : (authMeta?.workspaceId || '69a202afcf1d73e568280529')
         }],
         notifications_to_send: [],
         summary_for_lead: ''
