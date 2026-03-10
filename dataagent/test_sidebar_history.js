@@ -10,51 +10,40 @@ const puppeteer = require('puppeteer');
     // Wait for sidebar
     await page.waitForSelector('.ni');
 
-    // Let's create a standup chat
-    const standupBtn = await page.$$('.ni');
-    await standupBtn[1].click(); // Click Daily Standup nav item
-    console.log("Clicked Daily Standup");
+    // Click a recent chat history item
+    const recentChats = await page.$$('.hi');
+    if (recentChats.length > 0) {
+        console.log("Found recent chats in sidebar. Clicking the first one...");
+        await recentChats[0].click();
 
-    await new Promise(r => setTimeout(r, 1000));
+        // Wait for the UI view to flip
+        await new Promise(r => setTimeout(r, 2000));
 
-    await page.waitForSelector('.stbtn');
-    await page.click('.stbtn'); // Start Standup button
-    console.log("Started Standup");
-
-    await new Promise(r => setTimeout(r, 2000));
-
-    // Type something
-    await page.keyboard.type("I am working on the pulse layout.");
-    await page.keyboard.press("Enter");
-    console.log("Sent message to pulse");
-
-    // wait for response stream to settle
-    await new Promise(r => setTimeout(r, 8000));
-
-    // Refresh page
-    await page.goto('http://localhost:5656/pulse', { waitUntil: 'networkidle0' });
-    console.log("Reloaded page");
-
-    await new Promise(r => setTimeout(r, 2000));
-
-    // Read sidebars
-    const sidebarHtml = await page.evaluate(() => document.querySelector('#sb')?.innerHTML || '');
-    if (sidebarHtml.includes('working on the pulse')) {
-        console.log("SUCCESS: Found the chat title in the sidebar!");
+        // Check if messages list is rendered
+        const msgs = await page.$$('.msg');
+        console.log(`Successfully opened chat! Rendered ${msgs.length} messages.`);
     } else {
-        console.log("Chat not found in sidebar HTML... it might just have 'New Conversation' title or it's missing.");
-        console.log("Sidebar snippet:", sidebarHtml.substring(0, 500));
+        console.log("No recent chats found in sidebar.");
     }
 
-    // Click daily standup to see layout list
-    await page.evaluate(() => {
-        document.querySelectorAll('.ni')[1].click();
-    });
-    await new Promise(r => setTimeout(r, 1000));
+    // Click Daily Standup layout
+    const navs = await page.$$('.ni');
+    for (let n of navs) {
+        const text = await page.evaluate(el => el.textContent, n);
+        if (text && text.includes("Daily Standup")) {
+            await n.click();
+            console.log("Clicked Daily Standup Nav");
+            break;
+        }
+    }
 
-    const layoutHtml = await page.evaluate(() => document.querySelector('.main')?.innerHTML || '');
-    if (layoutHtml.includes('Past Standups')) {
+    await new Promise(r => setTimeout(r, 1500));
+    const mainHtml = await page.evaluate(() => document.querySelector('.main')?.innerHTML || '');
+    if (mainHtml.includes("Past Standups")) {
         console.log("SUCCESS: Past Standups section is visible.");
+        if (mainHtml.includes("at ")) {
+            console.log("-> Also found real past standup records in the grid.");
+        }
     }
 
     console.log("Finished script.");

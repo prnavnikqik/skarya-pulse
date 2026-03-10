@@ -25,7 +25,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
             return NextResponse.json({ success: false, error: 'Chat session not found' }, { status: 404 });
         }
 
-        return NextResponse.json({ success: true, messages: session.messages });
+        return NextResponse.json({ success: true, messages: session.messages, type: session.type });
     } catch (err) {
         console.error('Failed to load chat by ID', err);
         return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });

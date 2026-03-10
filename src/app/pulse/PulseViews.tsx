@@ -112,7 +112,7 @@ const ChatMessage = ({ msg, TEST_USER, addToolResult, setActiveDocument }: Messa
         {msg.content && (
           <div className="prose prose-sm max-w-none text-inherit prose-p:leading-relaxed">
             <ReactMarkdown>
-              {msg.content}
+              {typeof msg.content === 'string' ? msg.content : (Array.isArray(msg.content) ? msg.content.map((p: any) => p.text || '').join('\n') : String(msg.content))}
             </ReactMarkdown>
           </div>
         )}

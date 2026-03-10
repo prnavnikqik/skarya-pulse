@@ -88,10 +88,19 @@ export default function PulsePage() {
       const res = await fetch(`/api/chats/${id}`);
       const data = await res.json();
       if (data.success) {
-        setHomeChatId(id);
-        setHomeMsgs(data.messages || []);
-        setActiveCtx('home');
-        navTo('home');
+        if (data.type === 'standup') {
+          console.log("Loading STANDUP:", data);
+          setStandupChatId(id);
+          setStandupMsgs(data.messages || []);
+          setActiveCtx('standup');
+          navTo('standup-chat');
+        } else {
+          console.log("Loading HOME:", data);
+          setHomeChatId(id);
+          setHomeMsgs(data.messages || []);
+          setActiveCtx('home');
+          navTo('home');
+        }
         setShowHistory(false);
       }
     } catch (e) { console.error('Failed to load chat', e); }
