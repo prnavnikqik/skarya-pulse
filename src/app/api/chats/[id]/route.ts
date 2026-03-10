@@ -11,14 +11,15 @@ async function connectToDatabase() {
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
         await connectToDatabase();
-        if (!params || !params.id) {
+        const resolvedParams = await params;
+        if (!resolvedParams || !resolvedParams.id) {
             return NextResponse.json({ error: 'Missing chat ID' }, { status: 400 });
         }
 
-        const session = await ChatSession.findOne({ chatId: params.id }).lean() as any;
+        const session = await ChatSession.findOne({ chatId: resolvedParams.id }).lean() as any;
 
         if (!session) {
             return NextResponse.json({ success: false, error: 'Chat session not found' }, { status: 404 });

@@ -7,7 +7,8 @@ import { Topbar } from './Topbar';
 import { InputBar } from './InputBar';
 import { FallbackView, HomeView, StandupHistoryLayout, MessagesList } from './PulseViews';
 import './pulse.css';
-import { XCircle } from 'lucide-react';
+import { XCircle, History } from 'lucide-react';
+import { v4 as uuidv4 } from 'uuid';
 
 const TEST_USER = {
   workspaceId: '69a202afcf1d73e568280529',
@@ -55,17 +56,53 @@ export default function PulsePage() {
   const [input, setInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // Chat Persistence State
+  const [showHistory, setShowHistory] = useState(false);
+  const [pastChats, setPastChats] = useState<any[]>([]);
+  const [homeChatId, setHomeChatId] = useState<string>('');
+  const [standupChatId, setStandupChatId] = useState<string>('');
+
+  useEffect(() => {
+    setHomeChatId(uuidv4());
+    setStandupChatId(uuidv4());
+  }, []);
+
+  const fetchChats = async () => {
+    try {
+      const res = await fetch(`/api/chats?userEmail=${TEST_USER.userEmail}&workspaceId=${TEST_USER.workspaceId}`);
+      const data = await res.json();
+      if (data.success) {
+        setPastChats(data.sessions);
+        setShowHistory(true);
+      }
+    } catch (e) { console.error('Failed to fetch chats', e); }
+  };
+
+  const loadChat = async (id: string) => {
+    try {
+      const res = await fetch(`/api/chats/${id}`);
+      const data = await res.json();
+      if (data.success) {
+        setHomeChatId(id);
+        setHomeMsgs(data.messages || []);
+        setActiveCtx('home');
+        navTo('home');
+        setShowHistory(false);
+      }
+    } catch (e) { console.error('Failed to load chat', e); }
+  };
+
   const { messages: homeMsgs, status: homeStatus, setMessages: setHomeMsgs, append: appendHome, addToolResult: authToolResHome } = useChat({
     id: 'home',
     api: '/api/chat',
-    body: { ...TEST_USER, modelId: selectedModel.id },
+    body: { ...TEST_USER, modelId: selectedModel.id, chatId: homeChatId },
     maxSteps: 7
   } as any);
 
   const { messages: standupMsgs, status: standupStatus, setMessages: setStandupMsgs, append: appendStandup, addToolResult: authToolResStandup } = useChat({
     id: 'standup',
     api: '/api/chat',
-    body: { ...TEST_USER, modelId: selectedModel.id },
+    body: { ...TEST_USER, modelId: selectedModel.id, chatId: standupChatId },
     maxSteps: 7
   } as any);
 
@@ -90,8 +127,13 @@ export default function PulsePage() {
   };
 
   const newSession = () => {
-    if (activeCtx === 'home') setHomeMsgs([]);
-    else setStandupMsgs([]);
+    if (activeCtx === 'home') {
+      setHomeChatId(uuidv4());
+      setHomeMsgs([]);
+    } else {
+      setStandupChatId(uuidv4());
+      setStandupMsgs([]);
+    }
     navTo('home');
   };
 
@@ -117,6 +159,7 @@ export default function PulsePage() {
   };
 
   const startStandup = () => {
+    setStandupChatId(uuidv4());
     setStandupMsgs([]);
     setActiveCtx('standup');
     navTo('standup-chat');
@@ -156,6 +199,7 @@ export default function PulsePage() {
              setModelDropdownOpen(!isModelDropdownOpen);
           }}
           newSession={newSession}
+          fetchChats={fetchChats}
           AVAILABLE_MODELS={AVAILABLE_MODELS}
         />
 
@@ -245,6 +289,39 @@ export default function PulsePage() {
             <div className="p-6 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">
               <button onClick={() => window.print()} className="px-6 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-100">Print to PDF</button>
               <button onClick={() => setActiveDocument(null)} className="px-8 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-bold hover:bg-indigo-700">Done</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showHistory && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-opacity">
+          <div className="bg-white rounded-3xl w-full max-w-2xl max-h-[80vh] flex flex-col shadow-2xl animate-in slide-in-from-bottom-4 duration-300 pointer-events-auto relative">
+            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 rounded-t-3xl">
+              <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                <History className="w-5 h-5 text-indigo-500" />
+                Chat History
+              </h2>
+              <button onClick={() => setShowHistory(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
+                <XCircle className="w-6 h-6" />
+              </button>
+            </div>
+            <div className="p-6 overflow-y-auto custom-scrollbar flex-1 space-y-4 max-h-[60vh]">
+              {pastChats.length === 0 ? (
+                <div className="text-center text-slate-500 py-10">No chat history recorded yet.</div>
+              ) : (
+                pastChats.map((chat: any, i) => (
+                  <button key={i} onClick={() => loadChat(chat.chatId)} className="w-full text-left bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-3 relative overflow-hidden transition-all hover:border-indigo-300 hover:shadow-md group">
+                    <div className="absolute top-0 left-0 w-1 h-full bg-slate-200 group-hover:bg-indigo-500 transition-colors"></div>
+                    <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+                      {new Date(chat.createdAt).toLocaleDateString()} at {new Date(chat.createdAt).toLocaleTimeString()}
+                    </div>
+                    <div>
+                      <span className="font-bold text-indigo-900 group-hover:text-indigo-600 transition-colors">{chat.title}</span>
+                    </div>
+                  </button>
+                ))
+              )}
             </div>
           </div>
         </div>
