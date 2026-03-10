@@ -172,7 +172,7 @@ export class TaskWriter {
                     yearMonth: 1,
                     customPattern: ''
                 },
-                createdBy: 'pranav.patil@nikqik.com', // Demo fallback
+                createdBy: task.createdBy || 'Unknown User',
                 statusCategory: 'not_started'
             };
 
@@ -193,14 +193,14 @@ export class TaskWriter {
             const payload = {
                 name: subtask.name,
                 taskId: subtask.parentTaskId,
-                assignee: { email: subtask.assigneeEmail || 'pranav.patil@nikqik.com', name: 'User' },
+                assignee: { email: subtask.assigneeEmail, name: 'User' },
                 priority: subtask.priority || 'Medium',
                 status: subtask.status || 'To Do',
                 dueDate: new Date(Date.now() + 86400000 * 7).toISOString(),
                 startDate: new Date().toISOString(),
                 description: '',
                 checklist: [],
-                createdBy: 'pranav.patil@nikqik.com'
+                createdBy: subtask.createdBy || 'Unknown User'
             };
 
             const response = await skaryaClient.post(`${endpoint}?boardId=${subtask.boardId || '69a2118ecf1d73e568280ba5'}&workspaceId=${subtask.workspaceId || '69a202afcf1d73e568280529'}`, payload);

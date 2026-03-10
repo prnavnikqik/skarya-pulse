@@ -17,6 +17,13 @@ export async function POST(req: Request) {
       return new Response('Missing Context', { status: 400 });
     }
 
+    // Security: Verify user has access to this board
+    const { TaskReader } = await import('@/integrations/task-reader');
+    const hasAccess = await TaskReader.verifyBoardAccess(boardId, userEmail);
+    if (!hasAccess) {
+      return new Response('Unauthorized Board Access', { status: 403 });
+    }
+
     // 1. Initialize Models
     let selectedModel;
     if (modelId?.startsWith('claude')) {
@@ -45,8 +52,8 @@ export async function POST(req: Request) {
     // 3. Context Builder Layer
     // We enforce a strict max budget to prevent the token limit burst
     const controlledMessages = buildTokenControlledContext(messages, {
-      historyLimit: 6, // Increased to support multi-turn standup interviewing
-      systemPromptTokensEstimate: 400
+      historyLimit: 3, // Urgent reduction due to 12k TPM limit
+      systemPromptTokensEstimate: 300
     });
 
     // 4. Agent Engine Layer

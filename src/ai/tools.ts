@@ -18,8 +18,8 @@ export function getToolsForIntent(
     const all: Record<string, any> = getAllAgentTools(boardId, workspaceId, userEmail);
 
     const toolSets: Record<UserIntent, string[]> = {
-        standup_update: ['get_active_tasks', 'get_past_standups', 'update_task_status', 'add_task_comment', 'create_task', 'persist_standup', 'check_standup_consistency', 'get_my_overdue_tasks'],
-        task_query: ['get_active_tasks', 'get_task_details', 'search_tasks', 'get_task_comments', 'search_all_board_tasks'],
+        standup_update: ['get_active_tasks', 'get_my_workload_stats', 'get_past_standups', 'update_task_status', 'add_task_comment', 'create_task', 'persist_standup', 'check_standup_consistency', 'get_my_overdue_tasks', 'get_board_health', 'predict_deadline_risk'],
+        task_query: ['get_active_tasks', 'get_my_workload_stats', 'get_task_details', 'search_tasks', 'get_task_comments', 'search_all_board_tasks'],
         search_tasks: ['search_tasks', 'search_all_board_tasks', 'get_task_details'],
         board_analytics: ['get_board_health', 'get_team_tasks', 'detect_stuck_tasks', 'predict_deadline_risk', 'get_sprint_summary'],
         document_request: ['get_active_tasks', 'draft_document', 'get_board_health', 'generate_daily_digest', 'get_sprint_summary'],
@@ -81,6 +81,21 @@ function getAllAgentTools(boardId: string, workspaceId: string, userEmail: strin
                 try {
                     const details = await TaskReader.getTaskDetails(boardId, workspaceId, taskId);
                     return { success: true, details };
+                } catch (err: any) {
+                    return { success: false, error: err.message };
+                }
+            }
+        }),
+
+        get_my_workload_stats: tool({
+            description: 'Get status-wise breakdown of tasks assigned to the CURRENT USER (e.g. Done: 5, To Do: 3).',
+            parameters: z.object({
+                _ignore: z.any().optional()
+            }),
+            execute: async () => {
+                try {
+                    const stats = await TaskReader.getUserWorkloadStats(boardId, workspaceId, userEmail);
+                    return { success: true, ...stats };
                 } catch (err: any) {
                     return { success: false, error: err.message };
                 }
@@ -204,7 +219,8 @@ function getAllAgentTools(boardId: string, workspaceId: string, userEmail: strin
                         workspaceId,
                         assigneeEmail: args.assigneeEmail || userEmail,
                         status: 'To Do',
-                        priority: args.priority || 'Medium'
+                        priority: args.priority || 'Medium',
+                        createdBy: userEmail
                     });
                     return { success: result.status === 'success', result };
                 } catch (err: any) {
@@ -230,7 +246,8 @@ function getAllAgentTools(boardId: string, workspaceId: string, userEmail: strin
                         workspaceId,
                         assigneeEmail: args.assigneeEmail || userEmail,
                         status: 'To Do',
-                        priority: args.priority || 'Medium'
+                        priority: args.priority || 'Medium',
+                        createdBy: userEmail
                     });
                     return { success: result.status === 'success', result };
                 } catch (err: any) {
@@ -256,7 +273,7 @@ function getAllAgentTools(boardId: string, workspaceId: string, userEmail: strin
         get_board_health: tool({
             description: 'Analyze board-wide health (overdue, stuck, unassigned).',
             parameters: z.object({
-                _ignore: z.boolean().optional()
+                _ignore: z.any().optional()
             }),
             execute: async () => {
                 try {
@@ -271,7 +288,7 @@ function getAllAgentTools(boardId: string, workspaceId: string, userEmail: strin
         get_sprint_summary: tool({
             description: 'Metrics for current workload (completion, high priority).',
             parameters: z.object({
-                _ignore: z.boolean().optional()
+                _ignore: z.any().optional()
             }),
             execute: async () => {
                 try {
@@ -301,7 +318,7 @@ function getAllAgentTools(boardId: string, workspaceId: string, userEmail: strin
         predict_deadline_risk: tool({
             description: 'Predict tasks at risk (due < 7 days, low progress).',
             parameters: z.object({
-                _ignore: z.boolean().optional()
+                _ignore: z.any().optional()
             }),
             execute: async () => {
                 try {
@@ -316,7 +333,7 @@ function getAllAgentTools(boardId: string, workspaceId: string, userEmail: strin
         get_my_overdue_tasks: tool({
             description: 'Fetch current user\'s overdue tasks.',
             parameters: z.object({
-                _ignore: z.boolean().optional()
+                _ignore: z.any().optional()
             }),
             execute: async () => {
                 try {
@@ -331,7 +348,7 @@ function getAllAgentTools(boardId: string, workspaceId: string, userEmail: strin
         check_standup_consistency: tool({
             description: 'Compare standup promises with current status.',
             parameters: z.object({
-                _ignore: z.boolean().optional()
+                _ignore: z.any().optional()
             }),
             execute: async () => {
                 try {
@@ -364,7 +381,7 @@ function getAllAgentTools(boardId: string, workspaceId: string, userEmail: strin
         get_team_tasks: tool({
             description: 'View active tasks from the entire team (Read-only).',
             parameters: z.object({
-                _ignore: z.boolean().optional()
+                _ignore: z.any().optional()
             }),
             execute: async () => {
                 try {
@@ -413,7 +430,7 @@ function getAllAgentTools(boardId: string, workspaceId: string, userEmail: strin
         generate_daily_digest: tool({
             description: 'Daily team progress and risks summary.',
             parameters: z.object({
-                _ignore: z.boolean().optional()
+                _ignore: z.any().optional()
             }),
             execute: async () => {
                 try {

@@ -105,6 +105,7 @@ export interface NewTask {
   assigneeEmail: string
   status: 'To Do'
   priority: 'Low' | 'Medium' | 'High' | 'Critical'
+  createdBy: string
 }
 
 export interface NewSubtask extends NewTask {

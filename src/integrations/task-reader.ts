@@ -31,9 +31,9 @@ export class TaskReader {
 
         // Filter tasks logically based on assignee or collaborators
         const userTasks = allTasks.filter((task: any) => {
-            // Skarya's API structure for assignee varies. We will deeply scan for the email string.
-            const taskString = JSON.stringify(task).toLowerCase();
-            return taskString.includes(String(userEmail).toLowerCase());
+            const isAssignee = task.assigneePrimary?.email?.toLowerCase() === userEmail.toLowerCase();
+            const isCollaborator = task.collaborators?.some((c: any) => c.email?.toLowerCase() === userEmail.toLowerCase());
+            return isAssignee || isCollaborator;
         });
 
         console.log(`[TaskReader] Found ${userTasks.length} tasks relevant to the user after fetching.`);
@@ -63,10 +63,6 @@ export class TaskReader {
         return tasksWithSubtasks;
     }
 
-    /**
-     * Agent Tool 1: Fetches a lightweight list of active tasks for the user without subtasks.
-     * Use this for general context gathering.
-     */
     static async getActiveTasks(
         boardId: string,
         workspaceId: string,
@@ -79,7 +75,11 @@ export class TaskReader {
         const allTasks: SkaryaTask[] = Array.isArray(response.data) ? response.data : ((response.data as any)?.tasks || []);
 
         // Filter for user
-        const userTasks = allTasks.filter((task: any) => JSON.stringify(task).toLowerCase().includes(String(userEmail).toLowerCase()));
+        const userTasks = allTasks.filter((task: any) => {
+            const isAssignee = task.assigneePrimary?.email?.toLowerCase() === userEmail.toLowerCase();
+            const isCollaborator = task.collaborators?.some((c: any) => c.email?.toLowerCase() === userEmail.toLowerCase());
+            return isAssignee || isCollaborator;
+        });
 
         // Filter active map and limit
         const activeTasks = userTasks.filter(t => t.status !== 'Done' && t.status !== 'Completed');
@@ -90,6 +90,36 @@ export class TaskReader {
             priority: t.priority,
             dueDate: t.dueDate
         }));
+    }
+
+    /**
+     * Agent Tool: Get status-wise task counts for the current user.
+     */
+    static async getUserWorkloadStats(
+        boardId: string,
+        workspaceId: string,
+        userEmail: string
+    ) {
+        const response = await skaryaClient.get<any>('/api/boardTask/getBoardTask', { boardId, workspaceId });
+        if (!response.success || !response.data) throw new Error(`Failed to fetch tasks`);
+        const allTasks: SkaryaTask[] = Array.isArray(response.data) ? response.data : ((response.data as any)?.tasks || []);
+
+        const userTasks = allTasks.filter((task: any) => {
+            const isAssignee = task.assigneePrimary?.email?.toLowerCase() === userEmail.toLowerCase();
+            const isCollaborator = task.collaborators?.some((c: any) => c.email?.toLowerCase() === userEmail.toLowerCase());
+            return isAssignee || isCollaborator;
+        });
+
+        const stats: Record<string, number> = {};
+        userTasks.forEach(t => {
+            const status = t.status || 'Unknown';
+            stats[status] = (stats[status] || 0) + 1;
+        });
+
+        return {
+            total: userTasks.length,
+            breakdown: stats
+        };
     }
 
     /**
@@ -107,7 +137,11 @@ export class TaskReader {
         if (!response.success || !response.data) throw new Error(`Failed to fetch tasks`);
         const allTasks: SkaryaTask[] = Array.isArray(response.data) ? response.data : ((response.data as any)?.tasks || []);
 
-        const userTasks = allTasks.filter((task: any) => JSON.stringify(task).toLowerCase().includes(String(userEmail).toLowerCase()));
+        const userTasks = allTasks.filter((task: any) => {
+            const isAssignee = task.assigneePrimary?.email?.toLowerCase() === userEmail.toLowerCase();
+            const isCollaborator = task.collaborators?.some((c: any) => c.email?.toLowerCase() === userEmail.toLowerCase());
+            return isAssignee || isCollaborator;
+        });
 
         // Pseudo-semantic search: simple keyword matching across the stringified task
         const queryTerms = query.toLowerCase().split(' ').filter(t => t.length > 2);
@@ -346,7 +380,10 @@ export class TaskReader {
 
         const now = new Date();
         const myOverdue = allTasks.filter(t => {
-            const isMine = JSON.stringify(t).toLowerCase().includes(userEmail.toLowerCase());
+            const isAssignee = t.assigneePrimary?.email?.toLowerCase() === userEmail.toLowerCase();
+            const isCollaborator = t.collaborators?.some((c: any) => (c as any).email?.toLowerCase() === userEmail.toLowerCase());
+            const isMine = isAssignee || isCollaborator;
+
             if (!isMine || t.statusCategory === 'completed') return false;
             return t.dueDate && new Date(t.dueDate) < now;
         });
