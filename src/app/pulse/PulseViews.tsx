@@ -49,7 +49,7 @@ export const HomeView = ({ fillAndSend, user }: any) => (
   </div>
 );
 
-export const StandupHistoryLayout = ({ startStandup }: any) => (
+export const StandupHistoryLayout = ({ startStandup, pastStandups, loadChat }: any) => (
   <div className="pw">
     <div className="ptl">Daily Standup</div>
     <div className="psb">Current Sprint · Today</div>
@@ -61,7 +61,30 @@ export const StandupHistoryLayout = ({ startStandup }: any) => (
       </div>
       <button className="stbtn" onClick={startStandup}>Start Standup →</button>
     </div>
-    <FallbackView title="Past Standups" desc="Your team's standups from history." />
+    
+    <div style={{ marginTop: '32px' }}>
+      <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--a)' }}>Past Standups</h3>
+      {pastStandups && pastStandups.length > 0 ? (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px', marginTop: '16px' }}>
+          {pastStandups.map((s: any) => (
+             <div 
+               key={s.chatId} 
+               onClick={() => loadChat(s.chatId)} 
+               style={{ padding: '16px', background: '#fff', border: '1px solid var(--bd)', borderRadius: '12px', cursor: 'pointer', transition: 'all 0.2s ease', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}
+               onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--lbl)'}
+               onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--bd)'}
+             >
+               <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--lbl)', textTransform: 'uppercase', marginBottom: '8px' }}>
+                 {new Date(s.createdAt).toLocaleDateString()} at {new Date(s.createdAt).toLocaleTimeString()}
+               </div>
+               <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--a)' }}>{s.title}</div>
+             </div>
+          ))}
+        </div>
+      ) : (
+        <div style={{ marginTop: '16px', fontSize: '13px', color: 'var(--su)' }}>No past standup history available yet.</div>
+      )}
+    </div>
   </div>
 );
 

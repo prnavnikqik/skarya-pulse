@@ -12,7 +12,8 @@ export async function runAgentEngine(
     intentContext: string,
     intent: UserIntent,
     chatId?: string,
-    rawMessages?: any[]
+    rawMessages?: any[],
+    chatType?: string
 ) {
     const tools = getToolsForIntent(intent, boardId, workspaceId, userEmail);
 
@@ -63,6 +64,7 @@ export async function runAgentEngine(
                         workspaceId,
                         boardId,
                         title,
+                        type: chatType || 'chat',
                         $set: { messages: [...rawMessages, ...event.response.messages] }
                     },
                     { upsert: true, new: true, setDefaultsOnInsert: true }

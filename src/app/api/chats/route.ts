@@ -23,7 +23,7 @@ export async function GET(req: Request) {
         }
 
         const sessions = await ChatSession.find({ userEmail, workspaceId })
-            .select('chatId title createdAt')
+            .select('chatId title createdAt type')
             .sort({ createdAt: -1 })
             .lean();
 

@@ -65,17 +65,22 @@ export default function PulsePage() {
   useEffect(() => {
     setHomeChatId(uuidv4());
     setStandupChatId(uuidv4());
+    loadChatHistory();
   }, []);
 
-  const fetchChats = async () => {
+  const loadChatHistory = async () => {
     try {
       const res = await fetch(`/api/chats?userEmail=${TEST_USER.userEmail}&workspaceId=${TEST_USER.workspaceId}`);
       const data = await res.json();
       if (data.success) {
         setPastChats(data.sessions);
-        setShowHistory(true);
       }
     } catch (e) { console.error('Failed to fetch chats', e); }
+  };
+
+  const fetchChats = async () => {
+    await loadChatHistory();
+    setShowHistory(true);
   };
 
   const loadChat = async (id: string) => {
@@ -95,14 +100,14 @@ export default function PulsePage() {
   const { messages: homeMsgs, status: homeStatus, setMessages: setHomeMsgs, append: appendHome, addToolResult: authToolResHome } = useChat({
     id: 'home',
     api: '/api/chat',
-    body: { ...TEST_USER, modelId: selectedModel.id, chatId: homeChatId },
+    body: { ...TEST_USER, modelId: selectedModel.id, chatId: homeChatId, chatType: 'chat' },
     maxSteps: 7
   } as any);
 
   const { messages: standupMsgs, status: standupStatus, setMessages: setStandupMsgs, append: appendStandup, addToolResult: authToolResStandup } = useChat({
     id: 'standup',
     api: '/api/chat',
-    body: { ...TEST_USER, modelId: selectedModel.id, chatId: standupChatId },
+    body: { ...TEST_USER, modelId: selectedModel.id, chatId: standupChatId, chatType: 'standup' },
     maxSteps: 7
   } as any);
 
@@ -183,6 +188,8 @@ export default function PulsePage() {
          activeView={activeView} 
          navTo={navTo} 
          user={TEST_USER}
+         pastChats={pastChats}
+         loadChat={loadChat}
       />
 
       <div className="main">
@@ -219,7 +226,11 @@ export default function PulsePage() {
            </div>
 
            <div className={`view pview ${activeView === 'standup' ? 'active' : ''}`}>
-             <StandupHistoryLayout startStandup={startStandup} />
+             <StandupHistoryLayout 
+               startStandup={startStandup} 
+               pastStandups={pastChats.filter((c: any) => c.type === 'standup')}
+               loadChat={loadChat}
+             />
            </div>
 
            <div className={`view ${activeView === 'standup-chat' ? 'active flex flex-col' : ''}`}>

@@ -21,7 +21,7 @@ export const maxDuration = 60;
 export async function POST(req: Request) {
   try {
     await connectToDatabase();
-    const { messages, workspaceId, boardId, userEmail, modelId, chatId } = await req.json();
+    const { messages, workspaceId, boardId, userEmail, modelId, chatId, chatType } = await req.json();
 
     if (!workspaceId || !boardId || !userEmail) {
       return new Response('Missing Context', { status: 400 });
@@ -76,7 +76,8 @@ export async function POST(req: Request) {
       intentContextStr,
       intentResult.intent,
       chatId,
-      messages // original raw messages
+      messages, // original raw messages
+      chatType
     );
 
     // 5. Stream Output
