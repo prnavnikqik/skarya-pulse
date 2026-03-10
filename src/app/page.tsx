@@ -223,7 +223,7 @@ export default function PulsePage() {
 
         <div className="varea" onClick={() => setModelDropdownOpen(false)}>
            <div className={`view ${activeView === 'home' ? 'active' : ''} ${showHomeChat && activeView === 'home' ? 'flex flex-col' : ''}`}>
-             {!showHomeChat && <HomeView fillAndSend={fillAndSend} user={TEST_USER} />}
+             {!showHomeChat && <HomeView fillAndSend={fillAndSend} user={TEST_USER} startStandup={startStandup} />}
              {showHomeChat && (
                 <MessagesList 
                   messages={homeMsgs} 

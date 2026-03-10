@@ -14,14 +14,14 @@ export const FallbackView = ({ title, desc }: { title: string, desc: string }) =
   </div>
 );
 
-export const HomeView = ({ fillAndSend, user }: any) => (
+export const HomeView = ({ fillAndSend, user, startStandup }: any) => (
   <div className="hempty" id="hempty">
     <div className="orb-w"><div className="orb-g"></div><div className="orb"></div></div>
     <p className="gr">Good morning, {user?.userName?.split(' ')[0] || 'there'} 👋</p>
     <h1 className="hl">What's the <em>pulse</em> <strong>today?</strong></h1>
     <p className="hls">Standups · Summaries · Reports · Blockers</p>
     <div className="cgrid">
-      <div className="qc" onClick={() => fillAndSend('Run today\'s standup — facilitate it round by round for the team.')}>
+      <div className="qc" onClick={() => startStandup()}>
         <div className="qi qi-b"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
         <div className="ql">Run Today's Standup</div>
       </div>
