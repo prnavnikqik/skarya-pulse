@@ -6,6 +6,7 @@ import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
 import { InputBar } from './InputBar';
 import { FallbackView, HomeView, StandupHistoryLayout, MessagesList } from './PulseViews';
+import { BlockerRadarView, TeamAnalyticsView, SprintReportsView } from './DashboardViews';
 import './pulse.css';
 import { XCircle, History } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
@@ -169,7 +170,13 @@ export default function PulsePage() {
 
   const startStandup = () => {
     setStandupChatId(uuidv4());
-    setStandupMsgs([]);
+    setStandupMsgs([
+      { 
+        id: uuidv4(), 
+        role: 'assistant', 
+        content: "Good morning! Let's get started with your daily standup.\n\nTo begin, **what did you accomplish yesterday?**" 
+      }
+    ]);
     setActiveCtx('standup');
     navTo('standup-chat');
   };
@@ -253,15 +260,15 @@ export default function PulsePage() {
            </div>
 
            <div className={`view pview ${activeView === 'reports' ? 'active' : ''}`}>
-             <FallbackView title="Sprint Reports" desc="AI-generated digests for every sprint." />
+             <SprintReportsView workspaceId={TEST_USER.workspaceId} boardId={TEST_USER.boardId} fillAndSend={fillAndSend} />
            </div>
 
            <div className={`view pview ${activeView === 'analytics' ? 'active' : ''}`}>
-             <FallbackView title="Team Analytics" desc="Standup health and sprint performance." />
+             <TeamAnalyticsView workspaceId={TEST_USER.workspaceId} boardId={TEST_USER.boardId} fillAndSend={fillAndSend} />
            </div>
 
            <div className={`view pview ${activeView === 'blockers' ? 'active' : ''}`}>
-             <FallbackView title="Blocker Radar" desc="AI-detected blockers from standup sessions." />
+             <BlockerRadarView workspaceId={TEST_USER.workspaceId} boardId={TEST_USER.boardId} fillAndSend={fillAndSend} />
            </div>
 
            <div className={`view pview ${activeView === 'integrations' ? 'active' : ''}`}>
