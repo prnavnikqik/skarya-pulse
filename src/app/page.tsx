@@ -14,12 +14,33 @@ const TEST_USER = {
 };
 
 const AVAILABLE_MODELS = [
-  { id: 'llama-3.3-70b-versatile', name: 'Llama 3.3 70B' },
+  // OPENAI
+  { id: 'gpt-4o', name: 'GPT-4o' },
+  { id: 'gpt-4o-mini', name: 'GPT-4o Mini' },
+  { id: 'o1', name: 'o1' },
+  { id: 'o3-mini', name: 'o3-mini' },
+
+  // ANTHROPIC
   { id: 'claude-3-7-sonnet-20250219', name: 'Claude 3.7 Sonnet' },
   { id: 'claude-3-5-sonnet-latest', name: 'Claude 3.5 Sonnet' },
   { id: 'claude-3-5-haiku-latest', name: 'Claude 3.5 Haiku' },
+  { id: 'claude-3-opus-latest', name: 'Claude 3 Opus' },
+
+  // GEMINI
+  { id: 'gemini-3.0-pro', name: 'Gemini 3 Pro' },
+  { id: 'gemini-3.0-flash', name: 'Gemini 3 Flash' },
+  { id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro' },
+  { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash' },
+  { id: 'gemini-2.5-flash-lite', name: 'Gemini 2.5 Flash-Lite' },
   { id: 'gemini-2.0-flash-exp', name: 'Gemini 2.0 Flash' },
-  { id: 'gemini-1.5-flash-latest', name: 'Gemini 1.5 Flash' }
+  { id: 'gemini-1.5-pro-latest', name: 'Gemini 1.5 Pro' },
+  { id: 'gemini-1.5-flash-latest', name: 'Gemini 1.5 Flash' },
+
+  // GROQ
+  { id: 'llama-3.3-70b-versatile', name: 'Llama 3.3 70B' },
+  { id: 'llama3-70b-8192', name: 'Llama 3 70B' },
+  { id: 'llama3-8b-8192', name: 'Llama 3 8B' },
+  { id: 'mixtral-8x7b-32768', name: 'Mixtral 8x7B' },
 ];
 
 export default function PulsePage() {
