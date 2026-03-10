@@ -49,18 +49,44 @@ export const HomeView = ({ fillAndSend, user, startStandup }: any) => (
   </div>
 );
 
-export const StandupHistoryLayout = ({ startStandup, pastStandups, loadChat }: any) => (
+export const StandupHistoryLayout = ({ startStandup, pastStandups, loadChat }: any) => {
+  const isStandupDoneToday = pastStandups?.some(
+    (s: any) => new Date(s.createdAt).toDateString() === new Date().toDateString()
+  );
+
+  return (
   <div className="pw">
     <div className="ptl">Daily Standup</div>
     <div className="psb">Current Sprint · Today</div>
-    <div className="sban">
-      <div className="sban-i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
-      <div className="sban-t">
-        <div className="sban-ttl">Today's standup hasn't started yet</div>
-        <div className="sban-sub">Team members · Pulse facilitates round by round</div>
+    
+    {isStandupDoneToday ? (
+      <div className="bg-emerald-50 border border-emerald-200 p-6 rounded-3xl flex items-center justify-between mb-10 shadow-sm">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center text-emerald-600">
+            <CheckCircle2 className="w-6 h-6" />
+          </div>
+          <div>
+            <div className="font-bold text-emerald-900 text-lg">Today's standup is complete!</div>
+            <div className="text-emerald-700 text-sm mt-1">Great job logging your updates for the team.</div>
+          </div>
+        </div>
+        <button 
+          className="px-6 py-2.5 bg-white border border-emerald-200 text-emerald-700 font-bold rounded-xl hover:bg-emerald-100 transition-colors shadow-sm" 
+          onClick={startStandup}
+        >
+          Add Another Update
+        </button>
       </div>
-      <button className="stbtn" onClick={startStandup}>Start Standup →</button>
-    </div>
+    ) : (
+      <div className="sban">
+        <div className="sban-i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+        <div className="sban-t">
+          <div className="sban-ttl">Today's standup hasn't started yet</div>
+          <div className="sban-sub">Team members · Pulse facilitates round by round</div>
+        </div>
+        <button className="stbtn" onClick={startStandup}>Start Standup →</button>
+      </div>
+    )}
     
     <div style={{ marginTop: '40px' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
@@ -143,7 +169,8 @@ export const StandupHistoryLayout = ({ startStandup, pastStandups, loadChat }: a
       )}
     </div>
   </div>
-);
+  );
+};
 
 type MessageProps = {
   msg: any;
