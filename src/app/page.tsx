@@ -75,6 +75,29 @@ export default function PulsePage() {
     setShowHistory(true);
   };
 
+  const deleteChat = async (id: string, e: any) => {
+    e.stopPropagation();
+    try {
+      await fetch(`/api/chats/${id}`, { method: 'DELETE' });
+      await loadChatHistory();
+      if (homeChatId === id) newSession();
+      if (standupChatId === id) newSession();
+    } catch (err) { console.error('Failed to delete chat', err); }
+  };
+
+  const renameChat = async (id: string, newTitle: string, e?: any) => {
+    if (e) e.stopPropagation();
+    if (!newTitle.trim()) return;
+    try {
+      await fetch(`/api/chats/${id}`, { 
+        method: 'PATCH', 
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: newTitle.trim() })
+      });
+      await loadChatHistory();
+    } catch (err) { console.error('Failed to rename chat', err); }
+  };
+
   const loadChat = async (id: string) => {
     try {
       const res = await fetch(`/api/chats/${id}`);
@@ -201,6 +224,8 @@ export default function PulsePage() {
          user={TEST_USER}
          pastChats={pastChats}
          loadChat={loadChat}
+         onDeleteChat={deleteChat}
+         onRenameChat={renameChat}
       />
 
       <div className="main">

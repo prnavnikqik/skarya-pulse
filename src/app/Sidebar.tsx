@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
 export const Sidebar = ({ 
     isSidebarCollapsed, 
@@ -7,8 +7,22 @@ export const Sidebar = ({
     navTo,
     user,
     pastChats,
-    loadChat
+    loadChat,
+    onDeleteChat,
+    onRenameChat
   }: any) => {
+
+    const [editingId, setEditingId] = useState<string | null>(null);
+    const [editVal, setEditVal] = useState('');
+
+    const handleRenameSubmit = (id: string, e: any) => {
+      e.stopPropagation();
+      e.preventDefault();
+      if (editVal.trim()) {
+        onRenameChat(id, editVal.trim(), e);
+      }
+      setEditingId(null);
+    };
 
     // Get initials safely from user.userName
     const getInitials = (name: string) => {
@@ -92,10 +106,46 @@ export const Sidebar = ({
           {pastChats && pastChats.length > 0 && (
             <>
               <div className="slbl">Recent</div>
-              {pastChats.slice(0, 5).map((chat: any) => (
-                <div key={chat.chatId} className="hi" data-tip={chat.title} onClick={() => loadChat(chat.chatId)}>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                  <span>{chat.title} · {new Date(chat.createdAt).getDate()} {new Date(chat.createdAt).toLocaleString('default', { month: 'short' })}</span>
+              {pastChats.slice(0, 10).map((chat: any) => (
+                <div key={chat.chatId} className="hi group relative flex items-center justify-between" onClick={() => { if (editingId !== chat.chatId) loadChat(chat.chatId)}}>
+                  <div className="flex items-center gap-2 overflow-hidden flex-1">
+                    <svg className="min-w-[14px]" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    {editingId === chat.chatId ? (
+                      <input 
+                         autoFocus
+                         type="text" 
+                         value={editVal}
+                         onChange={e => setEditVal(e.target.value)}
+                         onKeyDown={e => {
+                           if (e.key === 'Enter') handleRenameSubmit(chat.chatId, e);
+                           if (e.key === 'Escape') setEditingId(null);
+                         }}
+                         onBlur={e => handleRenameSubmit(chat.chatId, e)}
+                         onClick={e => e.stopPropagation()}
+                         className="w-full bg-slate-100 text-slate-800 text-[11px] px-1.5 py-0.5 rounded outline-none border border-slate-300"
+                      />
+                    ) : (
+                      <span className="truncate pr-8" title={chat.title}>{chat.title}</span>
+                    )}
+                  </div>
+                  
+                  {/* Actions - visible on hover */}
+                  <div className="absolute right-2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1.5 bg-white pl-2">
+                     <button 
+                       onClick={(e) => { e.stopPropagation(); setEditingId(chat.chatId); setEditVal(chat.title); }}
+                       className="text-slate-400 hover:text-indigo-600 p-0.5" 
+                       title="Rename"
+                     >
+                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                     </button>
+                     <button 
+                       onClick={(e) => { if (confirm('Delete this session?')) onDeleteChat(chat.chatId, e); else e.stopPropagation(); }}
+                       className="text-slate-400 hover:text-red-500 p-0.5" 
+                       title="Delete"
+                     >
+                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                     </button>
+                  </div>
                 </div>
               ))}
             </>

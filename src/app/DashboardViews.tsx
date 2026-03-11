@@ -44,7 +44,7 @@ export function BlockerRadarView({ workspaceId, boardId, fillAndSend }: { worksp
       ) : (
         <div className="grid gap-4">
           {tasks.map(t => (
-            <div key={t.id} className="bg-white border border-rose-100 p-5 rounded-2xl shadow-sm flex items-center justify-between group">
+            <div key={t.id || t._id || Math.random()} className="bg-white border border-rose-100 p-5 rounded-2xl shadow-sm flex items-center justify-between group">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-rose-50 rounded-xl flex items-center justify-center text-rose-500">
                   <AlertCircle className="w-6 h-6" />
@@ -115,7 +115,7 @@ export function TeamAnalyticsView({ workspaceId, boardId, fillAndSend }: { works
           <h3 className="font-bold text-slate-700 mb-4">Overdue Tasks</h3>
           <div className="grid gap-3">
             {health.overdue.map((t: any) => (
-              <div key={t.id} className="bg-white p-4 rounded-xl border border-slate-100 flex justify-between shadow-sm">
+              <div key={t.id || t._id || Math.random()} className="bg-white p-4 rounded-xl border border-slate-100 flex justify-between shadow-sm">
                 <span className="font-medium">{t.name}</span>
                 <span className="text-sm text-slate-400">{t.assignee}</span>
               </div>
