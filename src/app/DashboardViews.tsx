@@ -70,6 +70,7 @@ export function BlockerRadarView({ workspaceId, boardId, fillAndSend }: { worksp
 export function TeamAnalyticsView({ workspaceId, boardId, fillAndSend }: { workspaceId: string, boardId: string, fillAndSend: (txt: string) => void }) {
   const [loading, setLoading] = useState(true);
   const [health, setHealth] = useState<any>(null);
+  const [showTeam, setShowTeam] = useState(false);
 
   useEffect(() => {
     fetchTeamAnalytics(boardId, workspaceId).then(res => {
@@ -80,12 +81,57 @@ export function TeamAnalyticsView({ workspaceId, boardId, fillAndSend }: { works
 
   if (loading) return <div className="flex h-64 items-center justify-center text-slate-400"><Loader2 className="animate-spin w-8 h-8" /></div>;
 
+  // Mock team members list
+  const mockTeam = [
+    { id: '1', name: 'Arnav', role: 'Admin', avatar: 'A', status: 'Online', bg: '#3b82f6' },
+    { id: '2', name: 'Sarah', role: 'Developer', avatar: 'S', status: 'Online', bg: '#10b981' },
+    { id: '3', name: 'John', role: 'Designer', avatar: 'J', status: 'Away', bg: '#e84393' }
+  ];
+
   return (
-    <div className="pw">
-      <div className="ptl">Team Analytics</div>
-      <div className="psb">Standup health & sprint performance</div>
+    <div className="pw pb-20">
+      <div className="flex items-start justify-between">
+        <div>
+          <div className="ptl">Team Analytics</div>
+          <div className="psb">Standup health & sprint performance</div>
+        </div>
+        <button 
+          className="px-4 py-2 bg-white border border-slate-200 text-sm font-bold text-slate-700 rounded-xl hover:bg-slate-50 transition-colors shadow-sm flex items-center gap-2"
+          onClick={() => setShowTeam(!showTeam)}
+        >
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          {showTeam ? 'Hide Team' : 'View Team'}
+        </button>
+      </div>
+
+      {showTeam && (
+        <div className="mt-6 mb-8 bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+          <div className="bg-slate-50 px-5 py-3 border-b border-slate-200">
+            <h3 className="text-sm font-bold text-slate-800">Team Members ({mockTeam.length})</h3>
+          </div>
+          <div className="p-2">
+            {mockTeam.map(member => (
+              <div key={member.id} className="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 transition-colors">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold" style={{ backgroundColor: member.bg }}>
+                    {member.avatar}
+                  </div>
+                  <div>
+                    <div className="font-bold text-sm text-slate-800">{member.name}</div>
+                    <div className="text-xs text-slate-500 font-medium">{member.role}</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 text-xs font-bold text-slate-500">
+                  <span className={`w-2 h-2 rounded-full ${member.status === 'Online' ? 'bg-emerald-500' : 'bg-slate-300'}`}></span>
+                  {member.status}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
       
-      <div className="statgrid">
+      <div className="statgrid" style={{ marginTop: '20px' }}>
         <div className="statc"><div className="statv">{health?.activeTasks || 0}</div><div className="statl">Active Tasks</div><div className="statd up">Stable</div></div>
         <div className="statc"><div className="statv">{health?.overdue?.length || 0}</div><div className="statl">Overdue Tasks</div><div className="statd dn">Action needed</div></div>
         <div className="statc"><div className="statv">{health?.dueSoon?.length || 0}</div><div className="statl">Due Soon</div><div className="statd up">On Track</div></div>
