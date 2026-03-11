@@ -134,46 +134,40 @@ export function SprintReportsView({ workspaceId, boardId, fillAndSend }: { works
 
   return (
     <div className="pw">
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <div className="ptl">Sprint Report</div>
-          <div className="psb text-slate-500">Current sprint metrics.</div>
-        </div>
+      <div className="ptl">Sprint Reports</div>
+      <div className="psb">AI-generated digests for every sprint</div>
+      <div className="prow">
         <button 
-          onClick={() => fillAndSend('Draft a full sprint report: velocity, completed tasks, blockers, risks, and highlights.')}
-          className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-colors shadow-md shadow-indigo-200"
-        >
-          <TrendingUp className="w-5 h-5" /> Draft Full Report with Pulse
+          className="pb dk" 
+          onClick={() => fillAndSend('Generate a mid-sprint report for Sprint 23: velocity, completed tasks, blockers, risks, and key highlights.')}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Generate Report
         </button>
       </div>
-
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-         <div className="p-6 bg-white border border-slate-200 rounded-3xl">
-           <div className="text-slate-500 text-xs font-bold uppercase mb-1">Total Tasks</div>
-           <div className="text-3xl font-black">{metrics?.total || 0}</div>
-         </div>
-         <div className="p-6 bg-white border border-emerald-200 rounded-3xl bg-emerald-50/50">
-           <div className="text-emerald-600 text-xs font-bold uppercase mb-1">Completed</div>
-           <div className="text-3xl font-black text-emerald-600">{metrics?.completed || 0}</div>
-         </div>
-         <div className="p-6 bg-white border border-amber-200 rounded-3xl bg-amber-50/50">
-           <div className="text-amber-600 text-xs font-bold uppercase mb-1">In Progress</div>
-           <div className="text-3xl font-black text-amber-600">{metrics?.inProgress || 0}</div>
-         </div>
-         <div className="p-6 bg-white border border-slate-200 rounded-3xl">
-           <div className="text-slate-500 text-xs font-bold uppercase mb-1">Not Started</div>
-           <div className="text-3xl font-black">{metrics?.notStarted || 0}</div>
-         </div>
-      </div>
-      
-      <div className="mt-8 p-6 bg-slate-50 border border-slate-200 rounded-3xl">
-         <div className="flex justify-between items-center mb-4">
-           <div className="font-bold text-slate-700">Completion Rate</div>
-           <div className="font-black text-indigo-600 text-2xl">{metrics?.completionRate?.toFixed(1) || 0}%</div>
-         </div>
-         <div className="w-full bg-slate-200 rounded-full h-4 overflow-hidden">
-           <div className="bg-indigo-500 h-4 rounded-full" style={{ width: `${metrics?.completionRate || 0}%` }}></div>
-         </div>
+      <div className="replist">
+        <div className="repc">
+          <div className="repico" style={{background:'#eef0ff', color:'var(--a)'}}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+          <div><div className="rept">Sprint 23 — In Progress</div><div className="repm">Mon–Sun · {metrics?.total || 0} tasks · {metrics?.completionRate?.toFixed(1) || 0}% velocity</div></div>
+          <div className="repacts">
+            <button className="ract" onClick={() => fillAndSend('Generate a mid-sprint AI report for Sprint 23 with velocity analysis, completed items, and risk assessment.')}>Generate</button>
+            <button className="ract" onClick={() => alert('Exported!')}>Export</button>
+          </div>
+        </div>
+        <div className="repc">
+          <div className="repico" style={{background:'#d1fae5', color:'#065f46'}}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div><div className="rept">Sprint 22 — Complete</div><div className="repm">{metrics?.completed || 0} completed · 94% velocity · {metrics?.inProgress || 0} carry-overs</div></div>
+          <div className="repacts">
+            <button className="ract" onClick={() => fillAndSend('Summarise Sprint 22 outcomes, velocity trends, and lessons learned.')}>View</button>
+            <button className="ract" onClick={() => alert('Exported!')}>Export</button>
+          </div>
+        </div>
+        <div className="repc">
+          <div className="repico" style={{background:'#d1fae5', color:'#065f46'}}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div><div className="rept">Sprint 21 — Complete</div><div className="repm">88% velocity · 4 carry-overs</div></div>
+          <div className="repacts">
+            <button className="ract" onClick={() => fillAndSend('Compare Sprint 21 vs Sprint 22 — what improved and what regressed?')}>View</button>
+            <button className="ract" onClick={() => alert('Exported!')}>Export</button>
+          </div>
+        </div>
       </div>
     </div>
   );
