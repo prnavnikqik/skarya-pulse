@@ -244,29 +244,45 @@ export function SummariesView({ workspaceId, boardId, fillAndSend }: { workspace
 
 export function SettingsView() {
   return (
-    <div className="pw">
+    <div className="pw pb-20">
       <div className="ptl">Settings</div>
-      <div className="psb">Standup format & mediator flow configuration</div>
+      <div className="psb mb-6">Standup format & mediator flow configuration</div>
       
       <div className="setblk">
-        <div className="settl">Standup Approach</div>
-        <div className="setrow">
+        <div className="settl text-indigo-600 font-bold mb-3">Team Definition & Scope</div>
+        <div className="setrow cursor-pointer" onClick={(e) => e.currentTarget.querySelector('.tog')?.classList.toggle('on')}>
+          <div><div className="setl">Workspace is the Team</div><div className="sets">Aggregate standups across all members in the entire workspace. Best for small startup teams.</div></div>
+          <div className="tog"></div>
+        </div>
+        <div className="setrow cursor-pointer" onClick={(e) => e.currentTarget.querySelector('.tog')?.classList.toggle('on')}>
+          <div><div className="setl">Derive Team from Shared Tasks</div><div className="sets">Pulse auto-detects your team by checking who has active assigned tasks in common with you.</div></div>
+          <div className="tog"></div>
+        </div>
+        <div className="setrow cursor-pointer" onClick={(e) => e.currentTarget.querySelector('.tog')?.classList.toggle('on')}>
+          <div><div className="setl">Board-Specific Standups (Default)</div><div className="sets">Strictly segment daily standups into separate groups per active Board.</div></div>
+          <div className="tog on"></div>
+        </div>
+      </div>
+
+      <div className="setblk mt-8">
+        <div className="settl text-indigo-600 font-bold mb-3">Standup Approach</div>
+        <div className="setrow cursor-pointer" onClick={(e) => e.currentTarget.querySelector('.tog')?.classList.toggle('on')}>
           <div><div className="setl">Continuous Updates</div><div className="sets">Team members can post updates anytime throughout the day. Summaries aggregate everything asynchronously.</div></div>
           <div className="tog on"></div>
         </div>
-        <div className="setrow">
+        <div className="setrow cursor-pointer" onClick={(e) => e.currentTarget.querySelector('.tog')?.classList.toggle('on')}>
           <div><div className="setl">Morning / Evening Setup</div><div className="sets">Strict two-window standup prompts (e.g. 9:00 AM check-in, 5:00 PM wrap-up).</div></div>
           <div className="tog"></div>
         </div>
       </div>
       
-      <div className="setblk">
-        <div className="settl">AI Behaviour</div>
-        <div className="setrow">
+      <div className="setblk mt-8">
+        <div className="settl text-indigo-600 font-bold mb-3">AI Behaviour</div>
+        <div className="setrow cursor-pointer" onClick={(e) => e.currentTarget.querySelector('.tog')?.classList.toggle('on')}>
           <div><div className="setl">Auto-generate summaries</div><div className="sets">Summarise the aggregated team updates automatically at the end of the day.</div></div>
           <div className="tog on"></div>
         </div>
-        <div className="setrow">
+        <div className="setrow cursor-pointer" onClick={(e) => e.currentTarget.querySelector('.tog')?.classList.toggle('on')}>
           <div><div className="setl">Smart blocker detection</div><div className="sets">Automatically flag blockers from raw messages and update Blocker Radar.</div></div>
           <div className="tog on"></div>
         </div>
