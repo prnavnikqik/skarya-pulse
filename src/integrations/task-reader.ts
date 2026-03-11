@@ -237,6 +237,57 @@ export class TaskReader {
     }
 
     /**
+     * Extracts unique team members assigned to tasks on a given board.
+     */
+    static async getTeamMembers(boardId: string, workspaceId: string) {
+        const response = await skaryaClient.get<any>('/api/boardTask/getBoardTask', { boardId, workspaceId });
+        if (!response.success || !response.data) return [];
+        const allTasks: SkaryaTask[] = Array.isArray(response.data) ? response.data : ((response.data as any)?.tasks || []);
+
+        const memberMap = new Map<string, any>();
+        const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4'];
+        
+        allTasks.forEach(t => {
+            const assignee = t.assigneePrimary;
+            if (assignee && assignee.email) {
+                if (!memberMap.has(assignee.email)) {
+                    // Simple hash for consistent coloring
+                    const colorIndex = assignee.email.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % colors.length;
+                    memberMap.set(assignee.email, {
+                        id: (assignee as any)._id || assignee.email,
+                        name: assignee.name || assignee.email.split('@')[0],
+                        email: assignee.email,
+                        role: 'Team Member',
+                        avatar: (assignee.name || assignee.email).substring(0, 2).toUpperCase(),
+                        status: 'Online', // Placeholder
+                        bg: colors[colorIndex]
+                    });
+                }
+            }
+            
+            // Also add collaborators if they exist
+            if (t.collaborators && Array.isArray(t.collaborators)) {
+                t.collaborators.forEach((collab: any) => {
+                    if (collab && collab.email && !memberMap.has(collab.email)) {
+                        const colorIndex = collab.email.split('').reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0) % colors.length;
+                        memberMap.set(collab.email, {
+                            id: collab._id || collab.email,
+                            name: collab.name || collab.email.split('@')[0],
+                            email: collab.email,
+                            role: 'Collaborator',
+                            avatar: (collab.name || collab.email).substring(0, 2).toUpperCase(),
+                            status: 'Online',
+                            bg: colors[colorIndex]
+                        });
+                    }
+                });
+            }
+        });
+
+        return Array.from(memberMap.values());
+    }
+
+    /**
      * Agent Tool: Get all team tasks (read-only, no user filtering).
      * Used for dependency detection in standup.
      */

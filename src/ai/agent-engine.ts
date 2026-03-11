@@ -44,7 +44,8 @@ export async function runAgentEngine(
         - PRECISION: Always use 'get_my_workload_stats' for status counts.
         - STANDUP: Interview style. Yesterday (Wait) -> Today (Wait) -> Blockers.
         - HEARING: Analyze subtext (overwhelmed? busy?). Suggest reassignments.
-        - SECURITY: Only update tasks for (${userEmail}). Confirm before mutations.
+        - SECURITY/PERMISSIONS: You can READ the status and info of ANY task and ANY user. However, you can ONLY update or modify tasks that are either explicitly assigned to (${userEmail}) OR are unassigned.
+        - ROADBLOCKS: The user (${userEmail}) can mark ANY task (even someone else's) as a roadblock for their own tasks. Let them do this easily. Confirm before mutations.
         Context: Board ${boardId}, User ${userEmail}. Intent: ${intent}.${memoryPrompt}`,
         messages,
         tools,

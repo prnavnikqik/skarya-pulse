@@ -15,7 +15,8 @@ export async function fetchBlockerRadar(boardId: string, workspaceId: string) {
 export async function fetchTeamAnalytics(boardId: string, workspaceId: string) {
   try {
     const health = await TaskReader.getBoardHealth(boardId, workspaceId);
-    return { success: true, health };
+    const members = await TaskReader.getTeamMembers(boardId, workspaceId);
+    return { success: true, health, members };
   } catch (error: any) {
     console.error("fetchTeamAnalytics error:", error);
     return { success: false, error: error.message };

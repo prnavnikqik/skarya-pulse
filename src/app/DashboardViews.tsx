@@ -70,23 +70,20 @@ export function BlockerRadarView({ workspaceId, boardId, fillAndSend }: { worksp
 export function TeamAnalyticsView({ workspaceId, boardId, fillAndSend }: { workspaceId: string, boardId: string, fillAndSend: (txt: string) => void }) {
   const [loading, setLoading] = useState(true);
   const [health, setHealth] = useState<any>(null);
+  const [members, setMembers] = useState<any[]>([]);
   const [showTeam, setShowTeam] = useState(false);
 
   useEffect(() => {
     fetchTeamAnalytics(boardId, workspaceId).then(res => {
-      if (res.success) setHealth(res.health);
+      if (res.success) {
+        setHealth(res.health);
+        if (res.members) setMembers(res.members);
+      }
       setLoading(false);
     });
   }, [boardId, workspaceId]);
 
   if (loading) return <div className="flex h-64 items-center justify-center text-slate-400"><Loader2 className="animate-spin w-8 h-8" /></div>;
-
-  // Mock team members list
-  const mockTeam = [
-    { id: '1', name: 'Arnav', role: 'Admin', avatar: 'A', status: 'Online', bg: '#3b82f6' },
-    { id: '2', name: 'Sarah', role: 'Developer', avatar: 'S', status: 'Online', bg: '#10b981' },
-    { id: '3', name: 'John', role: 'Designer', avatar: 'J', status: 'Away', bg: '#e84393' }
-  ];
 
   return (
     <div className="pw pb-20">
@@ -107,10 +104,10 @@ export function TeamAnalyticsView({ workspaceId, boardId, fillAndSend }: { works
       {showTeam && (
         <div className="mt-6 mb-8 bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
           <div className="bg-slate-50 px-5 py-3 border-b border-slate-200">
-            <h3 className="text-sm font-bold text-slate-800">Team Members ({mockTeam.length})</h3>
+            <h3 className="text-sm font-bold text-slate-800">Team Members ({members.length})</h3>
           </div>
           <div className="p-2">
-            {mockTeam.map(member => (
+            {members.length > 0 ? members.map(member => (
               <div key={member.id} className="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 transition-colors">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold" style={{ backgroundColor: member.bg }}>
@@ -126,7 +123,7 @@ export function TeamAnalyticsView({ workspaceId, boardId, fillAndSend }: { works
                   {member.status}
                 </div>
               </div>
-            ))}
+            )) : <div className="p-4 text-center text-sm font-medium text-slate-500">No active team members detected on this board yet.</div>}
           </div>
         </div>
       )}
