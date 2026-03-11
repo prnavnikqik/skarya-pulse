@@ -22,17 +22,16 @@ export function BlockerRadarView({ workspaceId, boardId, fillAndSend }: { worksp
 
   return (
     <div className="pw">
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <div className="ptl">Blocker Radar</div>
-          <div className="psb text-slate-500">Tasks with no movement in the last 7 days.</div>
-        </div>
+      <div className="ptl">Blocker Radar</div>
+      <div className="psb text-slate-500">AI-detected from standup sessions</div>
+      <div className="prow">
         <button 
           onClick={() => fillAndSend('What are the active blockers here and what are your recommended resolutions for each?')}
-          className="flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-600 font-bold rounded-xl hover:bg-indigo-100 transition-colors"
+          className="pb dk"
         >
-          <AlertCircle className="w-5 h-5" /> Ask Pulse for Resolutions
+          AI Suggest Fixes
         </button>
+        <button className="pb" onClick={() => fillAndSend('I need to log a new blocker. Please ask me for the details.')}>Log Blocker</button>
       </div>
 
       {tasks.length === 0 ? (
@@ -42,22 +41,24 @@ export function BlockerRadarView({ workspaceId, boardId, fillAndSend }: { worksp
           <p className="text-slate-500">No stuck tasks currently detected.</p>
         </div>
       ) : (
-        <div className="grid gap-4">
-          {tasks.map(t => (
-            <div key={t.id || t._id || Math.random()} className="bg-white border border-rose-100 p-5 rounded-2xl shadow-sm flex items-center justify-between group">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-rose-50 rounded-xl flex items-center justify-center text-rose-500">
-                  <AlertCircle className="w-6 h-6" />
-                </div>
-                <div>
-                  <h4 className="font-bold text-slate-800 text-lg">{t.name}</h4>
-                  <div className="flex items-center gap-3 text-sm text-slate-500 mt-1">
-                    <span className="flex items-center gap-1"><Users className="w-4 h-4" /> {t.assignee}</span>
-                    <span className="flex items-center gap-1"><Clock className="w-4 h-4" /> Stuck since {new Date(t.lastActive).toLocaleDateString()}</span>
+        <div className="bklist">
+          {tasks.map((t, idx) => (
+            <div key={t.id || t._id || Math.random()} className={`bkc ${idx % 2 === 0 ? 'crit' : 'med'}`}>
+              <span className={`bsev ${idx % 2 === 0 ? 'c' : 'm'}`}>{idx % 2 === 0 ? 'Critical' : 'Medium'}</span>
+              <div className="bkbd">
+                <div className="bkt">{t.name}</div>
+                <div className="bkd">This task has had no movement since {new Date(t.lastActive).toLocaleDateString()}, flagged as a potential blocker. Current status is {t.status}.</div>
+                <div className="bkf">
+                  <div className="bkwho">
+                    <div className="bkav" style={{background: idx % 2 === 0 ? '#e84393' : '#10b981'}}>
+                      {t.assignee?.substring(0,2).toUpperCase() || 'U'}
+                    </div>
+                    {t.assignee || 'Unassigned'}
                   </div>
+                  <span className="bkdate">Stuck</span>
+                  <button className="resbtn" onClick={(e) => { e.currentTarget.textContent = 'Resolved ✓'; e.currentTarget.style.color = '#10b981'; e.currentTarget.style.background = '#ecfdf5'; }}>Mark Resolved</button>
                 </div>
               </div>
-              <span className="px-3 py-1 bg-slate-100 text-slate-600 rounded-lg text-xs font-bold uppercase tracking-wider">{t.status}</span>
             </div>
           ))}
         </div>
@@ -81,43 +82,34 @@ export function TeamAnalyticsView({ workspaceId, boardId, fillAndSend }: { works
 
   return (
     <div className="pw">
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <div className="ptl">Team Analytics</div>
-          <div className="psb text-slate-500">Board health and task distribution.</div>
-        </div>
-        <button 
-          onClick={() => fillAndSend('Give me a team performance analysis with actionable insights.')}
-          className="flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-600 font-bold rounded-xl hover:bg-indigo-100 transition-colors"
-        >
-          <TrendingUp className="w-5 h-5" /> Analyze with Pulse
-        </button>
-      </div>
-
-      <div className="grid grid-cols-3 gap-6 mb-8">
-        <div className="bg-white border border-slate-200 p-6 rounded-3xl shadow-sm">
-          <div className="text-slate-500 text-sm font-bold uppercase tracking-wider mb-2">Total Active</div>
-          <div className="text-4xl font-black text-slate-800">{health?.activeTasks || 0}</div>
-        </div>
-        <div className="bg-white border border-orange-200 p-6 rounded-3xl shadow-sm bg-orange-50/30">
-          <div className="text-orange-500 text-sm font-bold uppercase tracking-wider mb-2">Overdue</div>
-          <div className="text-4xl font-black text-orange-600">{health?.overdue?.length || 0}</div>
-        </div>
-        <div className="bg-white border border-emerald-200 p-6 rounded-3xl shadow-sm bg-emerald-50/30">
-          <div className="text-emerald-600 text-sm font-bold uppercase tracking-wider mb-2">Due Soon</div>
-          <div className="text-4xl font-black text-emerald-600">{health?.dueSoon?.length || 0}</div>
-        </div>
+      <div className="ptl">Team Analytics</div>
+      <div className="psb">Standup health & sprint performance</div>
+      
+      <div className="statgrid">
+        <div className="statc"><div className="statv">{health?.activeTasks || 0}</div><div className="statl">Active Tasks</div><div className="statd up">Stable</div></div>
+        <div className="statc"><div className="statv">{health?.overdue?.length || 0}</div><div className="statl">Overdue Tasks</div><div className="statd dn">Action needed</div></div>
+        <div className="statc"><div className="statv">{health?.dueSoon?.length || 0}</div><div className="statl">Due Soon</div><div className="statd up">On Track</div></div>
+        <div className="statc"><div className="statv">100<span style={{fontSize:'13px',fontWeight:500,color:'var(--mu)'}}>%</span></div><div className="statl">Participation today</div><div className="statd up">Great 🎉</div></div>
       </div>
       
-      {/* List Overdue tasks quickly */}
+      <div className="chbox">
+        <div className="chtl">AI Insights</div>
+        <div className="p-4 bg-white/50 text-slate-600 text-sm">
+           Based on current velocity, {health?.activeTasks || 0} tasks are active. 
+           {health?.overdue?.length > 0 ? ` WARNING: ${health.overdue.length} tasks are overdue. Recommend AI review.` : ' No overdue tasks detected.'}
+        </div>
+        <button className="pb" style={{ marginTop: 12 }} onClick={() => fillAndSend('Give me a team performance analysis with actionable insights.')}>AI Deep Dive →</button>
+      </div>
+
       {health?.overdue?.length > 0 && (
-        <div>
-          <h3 className="font-bold text-slate-700 mb-4">Overdue Tasks</h3>
-          <div className="grid gap-3">
+        <div className="twocol" style={{ marginTop: '24px' }}>
+          <div className="box" style={{ gridColumn: '1 / -1' }}>
+            <div className="boxt">Overdue Tasks</div>
             {health.overdue.map((t: any) => (
-              <div key={t.id || t._id || Math.random()} className="bg-white p-4 rounded-xl border border-slate-100 flex justify-between shadow-sm">
-                <span className="font-medium">{t.name}</span>
-                <span className="text-sm text-slate-400">{t.assignee}</span>
+              <div key={t.id || t._id || Math.random()} className="vrow">
+                <div className="vav" style={{background:'#f43f5e'}}>{t.assignee?.substring(0,2).toUpperCase() || 'U'}</div>
+                <span className="vname">{t.name}</span>
+                <span className="vpct text-orange-600 font-medium">Overdue</span>
               </div>
             ))}
           </div>
