@@ -172,3 +172,105 @@ export function SprintReportsView({ workspaceId, boardId, fillAndSend }: { works
     </div>
   );
 }
+
+export function SummariesView({ workspaceId, boardId, fillAndSend }: { workspaceId: string, boardId: string, fillAndSend: (txt: string) => void }) {
+  const [loading, setLoading] = useState(true);
+  const [summaries, setSummaries] = useState<any[]>([]);
+
+  useEffect(() => {
+    // In a future phase, this will fetch from the new TeamStandup model.
+    // For now, simulating the fetch.
+    setSummaries([
+      {
+        id: 'mock-1',
+        title: 'Daily Standup — ' + new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }),
+        metrics: '6 members · 14 min · 3 blockers',
+        tags: [{ label: 'Standup', colorClass: 'b' }, { label: '3 Blockers', colorClass: 'r' }],
+        content: "Aarav: SSO ✅, rate limiting today — needs load test data from Lena. Sofia: blocked on mobile nav (Figma handoff from Diana due today). Marcus: DB pool at 94% + DBA approval pending. Diana: tokens 80%, spacing audit done (14 issues in Notion). James: research complete — time-range filter to front. Lena: CloudWatch access pending.",
+        events: [
+          { text: "@pranvnikqik gave an update - roadblock detected", class: "am" },
+          { text: "@sarah just posted an afternoon update", class: "g" }
+        ]
+      }
+    ]);
+    setLoading(false);
+  }, [boardId, workspaceId]);
+
+  if (loading) return <div className="flex h-64 items-center justify-center text-slate-400"><Loader2 className="animate-spin w-8 h-8" /></div>;
+
+  return (
+    <div className="pw">
+      <div className="ptl">Summaries</div>
+      <div className="psb">Team-wide aggregated updates</div>
+      <div className="prow">
+        <button className="pb dk" onClick={() => fillAndSend('Generate a full summary for today\'s standup with all updates, blockers, and action items.')}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Generate Summary
+        </button>
+      </div>
+      <div className="suml">
+        {summaries.map((s, i) => (
+          <div key={s.id} className="sumc">
+            <div className="sumc-h">
+              <div className="sumc-i" style={{background:'#eff6ff',color:'#3b82f6'}}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+              </div>
+              <div><div className="sumc-t">{s.title}</div><div className="sumc-m">{s.metrics}</div></div>
+              <div className="sumc-tags">
+                {s.tags.map((t: any, j: number) => <span key={j} className={`tag ${t.colorClass}`}>{t.label}</span>)}
+              </div>
+            </div>
+            
+            {i === 0 && s.events && (
+              <div className="mb-4 mt-1 flex flex-col gap-2">
+                {s.events.map((e: any, j: number) => (
+                   <div key={j} className={`tag ${e.class} text-xs py-1.5 px-3 mb-1 w-fit rounded-lg`}>{e.text}</div>
+                ))}
+              </div>
+            )}
+            
+            <div className="sumc-b" dangerouslySetInnerHTML={{ __html: s.content }} />
+            <div className="sumc-f">
+              <button className="sa p" onClick={() => alert('Opening aggregate chat viewer is coming soon')}>Open Chat</button>
+              <button className="sa" onClick={() => alert('Copied ✓')}>Copy</button>
+              <button className="sa" onClick={() => alert('Sent to Slack ✓')}>→ Slack</button>
+              <button className="sa" onClick={() => alert('Saved to Notion ✓')}>→ Notion</button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export function SettingsView() {
+  return (
+    <div className="pw">
+      <div className="ptl">Settings</div>
+      <div className="psb">Standup format & mediator flow configuration</div>
+      
+      <div className="setblk">
+        <div className="settl">Standup Approach</div>
+        <div className="setrow">
+          <div><div className="setl">Continuous Updates</div><div className="sets">Team members can post updates anytime throughout the day. Summaries aggregate everything asynchronously.</div></div>
+          <div className="tog on"></div>
+        </div>
+        <div className="setrow">
+          <div><div className="setl">Morning / Evening Setup</div><div className="sets">Strict two-window standup prompts (e.g. 9:00 AM check-in, 5:00 PM wrap-up).</div></div>
+          <div className="tog"></div>
+        </div>
+      </div>
+      
+      <div className="setblk">
+        <div className="settl">AI Behaviour</div>
+        <div className="setrow">
+          <div><div className="setl">Auto-generate summaries</div><div className="sets">Summarise the aggregated team updates automatically at the end of the day.</div></div>
+          <div className="tog on"></div>
+        </div>
+        <div className="setrow">
+          <div><div className="setl">Smart blocker detection</div><div className="sets">Automatically flag blockers from raw messages and update Blocker Radar.</div></div>
+          <div className="tog on"></div>
+        </div>
+      </div>
+    </div>
+  );
+}

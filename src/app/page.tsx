@@ -6,7 +6,7 @@ import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
 import { InputBar } from './InputBar';
 import { FallbackView, HomeView, StandupHistoryLayout, MessagesList } from './PulseViews';
-import { BlockerRadarView, TeamAnalyticsView, SprintReportsView } from './DashboardViews';
+import { BlockerRadarView, TeamAnalyticsView, SprintReportsView, SummariesView, SettingsView } from './DashboardViews';
 import './pulse.css';
 import { XCircle, History } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
@@ -281,7 +281,7 @@ export default function PulsePage() {
            </div>
 
            <div className={`view pview ${activeView === 'summaries' ? 'active' : ''}`}>
-             <FallbackView title="Summaries" desc="AI-generated summaries after every session." />
+             <SummariesView workspaceId={TEST_USER.workspaceId} boardId={TEST_USER.boardId} fillAndSend={fillAndSend} />
            </div>
 
            <div className={`view pview ${activeView === 'reports' ? 'active' : ''}`}>
@@ -301,7 +301,7 @@ export default function PulsePage() {
            </div>
 
            <div className={`view pview ${activeView === 'settings' ? 'active' : ''}`}>
-             <FallbackView title="Settings" desc="Pulse preferences for your workspace." />
+             <SettingsView />
            </div>
         </div>
 
