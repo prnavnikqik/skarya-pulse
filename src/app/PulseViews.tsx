@@ -131,7 +131,42 @@ type MessageProps = {
   setActiveDocument: any;
 };
 
+// Human-friendly labels and icons for each tool
+const TOOL_META: Record<string, { loading: string; done: string; icon: string }> = {
+  get_board_health:       { loading: 'Analyzing board health',    done: 'Board health analyzed',    icon: '🩺' },
+  get_team_tasks:         { loading: 'Fetching team tasks',       done: 'Team tasks loaded',         icon: '📋' },
+  get_my_tasks:           { loading: 'Loading your tasks',        done: 'Tasks loaded',              icon: '✅' },
+  get_my_workload_stats:  { loading: 'Checking your workload',    done: 'Workload checked',           icon: '📊' },
+  detect_stuck_tasks:     { loading: 'Scanning for blockers',     done: 'Blocker scan complete',     icon: '🔍' },
+  predict_deadline_risk:  { loading: 'Checking deadline risks',   done: 'Risk analysis done',        icon: '⚠️' },
+  get_sprint_summary:     { loading: 'Loading sprint summary',    done: 'Sprint summary ready',      icon: '🏃' },
+  get_active_tasks:       { loading: 'Fetching active tasks',     done: 'Active tasks loaded',       icon: '⚡' },
+  get_overdue_tasks:      { loading: 'Finding overdue tasks',     done: 'Overdue check done',        icon: '🚨' },
+  create_task:            { loading: 'Creating task',             done: 'Task created',              icon: '✨' },
+  update_task_status:     { loading: 'Updating task status',      done: 'Status updated',            icon: '🔄' },
+  update_task_priority:   { loading: 'Adjusting priority',        done: 'Priority updated',          icon: '🎯' },
+  set_task_dates:         { loading: 'Setting dates',             done: 'Dates set',                 icon: '📅' },
+  assign_task:            { loading: 'Assigning task',            done: 'Task assigned',             icon: '👤' },
+  add_task_comment:       { loading: 'Adding comment',            done: 'Comment added',             icon: '💬' },
+  create_subtask:         { loading: 'Creating subtask',          done: 'Subtask created',           icon: '📌' },
+  draft_document:         { loading: 'Drafting document',         done: 'Document drafted',          icon: '📝' },
+};
+
+const getToolMeta = (toolName: string) =>
+  TOOL_META[toolName] ?? {
+    loading: toolName.replace(/_/g, ' ').toLowerCase(),
+    done: toolName.replace(/_/g, ' ').toLowerCase() + ' done',
+    icon: '⚙️'
+  };
+
+const MUTATION_TOOLS = [
+  'create_task', 'update_task_status', 'add_task_comment', 'create_subtask',
+  'draft_document', 'update_task_priority', 'set_task_dates', 'assign_task'
+];
+
 const ChatMessage = ({ msg, TEST_USER, addToolResult, setActiveDocument }: MessageProps) => {
+  const [showToolDetails, setShowToolDetails] = React.useState(false);
+
   const getInitials = (name: string) => {
     if (!name) return 'ME';
     return name.substring(0, 2).toUpperCase();
@@ -139,12 +174,19 @@ const ChatMessage = ({ msg, TEST_USER, addToolResult, setActiveDocument }: Messa
 
   const userInitials = TEST_USER ? getInitials(TEST_USER.userName) : 'ME';
 
+  const invocations: any[] = msg.toolInvocations || [];
+  const completedTools = invocations.filter(t => t.result);
+  const pendingTools = invocations.filter(t => !t.result);
+  const failedTools = completedTools.filter(t => t.result && !t.result.success);
+
   return (
     <div className={`msg ${msg.role === 'user' ? 'u' : 'ai-msg'}`}>
       <div className={`av ${msg.role === 'user' ? 'u' : 'ai'}`}>
         {msg.role === 'user' ? userInitials : 'SP'}
       </div>
+
       <div className={`bbl ${msg.role === 'user' ? 'u' : 'ai'}`}>
+        {/* Message Text */}
         {msg.content && (
           <div className="prose prose-sm max-w-none text-inherit prose-p:leading-relaxed">
             <ReactMarkdown>
@@ -152,72 +194,83 @@ const ChatMessage = ({ msg, TEST_USER, addToolResult, setActiveDocument }: Messa
             </ReactMarkdown>
           </div>
         )}
-        
-        {msg.toolInvocations?.map((toolInvocation: any) => {
-          const { toolCallId, toolName, args, result } = toolInvocation;
 
-          // CONFIRMATION UI FOR MUTATIONS
-          if (!result) {
-            const isMutation = [
-              'create_task', 'update_task_status', 'add_task_comment', 'create_subtask',
-              'draft_document', 'update_task_priority', 'set_task_dates', 'assign_task'
-            ].includes(toolName);
+        {/* Pending Tools - loading pill per tool */}
+        {pendingTools.map((toolInvocation: any) => {
+          const { toolCallId, toolName, args } = toolInvocation;
+          const meta = getToolMeta(toolName);
 
-            if (isMutation) {
-              return (
-                <div key={toolCallId} className="mt-3 bg-white border border-[#c7d2fe] rounded-[13px] shadow-[0_4px_18px_rgba(91,94,244,0.1)] overflow-hidden">
-                  <div className="bg-[#eef0ff] px-4 py-3 flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-[#5b5ef4]" />
-                    <span className="font-bold text-[#111] text-[12px] uppercase tracking-wider">Action: {toolName.replace(/_/g, ' ')}</span>
-                  </div>
-                  <div className="p-4">
-                    <pre className="text-[10px] font-mono bg-[#f7f8fa] p-3 rounded-lg text-slate-600 mb-4 max-h-32 overflow-y-auto border border-[var(--bd)]">
-                      {JSON.stringify(args, null, 2)}
-                    </pre>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={async () => {
-                          const res = await executeSkaryaAction(toolName, { ...args, _authMeta: TEST_USER });
-                          addToolResult({ toolCallId, result: res } as any);
-                          if (toolName === 'draft_document' && res.success) {
-                            setActiveDocument({ title: args.title, content: args.content });
-                          }
-                        }}
-                        className="flex-1 bg-[#111] text-white py-2 rounded-lg text-xs font-bold hover:opacity-85"
-                      > Confirm Action </button>
-                      <button
-                        onClick={() => addToolResult({ toolCallId, result: { success: false, error: 'Cancelled' } } as any)}
-                        className="px-4 py-2 border border-[var(--bd)] rounded-lg text-xs font-bold text-gray-500 hover:bg-[#f3f4f6]"
-                      > Cancel </button>
-                    </div>
-                  </div>
+          if (MUTATION_TOOLS.includes(toolName)) {
+            return (
+              <div key={toolCallId} className="tool-confirm-card">
+                <div className="tool-confirm-hd">
+                  <span className="tool-confirm-icon">✦</span>
+                  <span className="tool-confirm-label">Ready to {meta.loading.toLowerCase()}. Confirm?</span>
                 </div>
-              );
-            }
-            return (
-              <div key={toolCallId} className="flex items-center gap-2 mt-3 text-[var(--a)] text-xs font-bold animate-pulse">
-                <Loader2 className="w-3 h-3 animate-spin" /> {toolName.replace(/_/g, ' ')}...
+                <details className="tool-confirm-args">
+                  <summary className="tool-confirm-sum">View details</summary>
+                  <pre>{JSON.stringify(args, null, 2)}</pre>
+                </details>
+                <div className="tool-confirm-btns">
+                  <button
+                    onClick={async () => {
+                      const res = await executeSkaryaAction(toolName, { ...args, _authMeta: TEST_USER });
+                      addToolResult({ toolCallId, result: res } as any);
+                      if (toolName === 'draft_document' && res.success) {
+                        setActiveDocument({ title: args.title, content: args.content });
+                      }
+                    }}
+                    className="tool-btn-confirm"
+                  >
+                    {meta.icon} Confirm
+                  </button>
+                  <button
+                    onClick={() => addToolResult({ toolCallId, result: { success: false, error: 'Cancelled' } } as any)}
+                    className="tool-btn-cancel"
+                  >
+                    Cancel
+                  </button>
+                </div>
               </div>
             );
           }
 
-          // RESULT RENDERING
-          if (result && result.success) {
-            return (
-              <div key={toolCallId} className="mt-2 text-[#065f46] text-[10px] font-bold uppercase tracking-widest opacity-80">
-                ✓ {toolName} Executed Successfully
-              </div>
-            );
-          }
-          else if (result && !result.success) {
-            return (
-              <div key={toolCallId} className="mt-2 text-[#dc2626] text-[10px] font-bold uppercase tracking-widest opacity-80">
-                ✕ Action Failed
-              </div>
-            );
-          }
-          return null;
+          return (
+            <div key={toolCallId} className="tool-loading-pill">
+              <div className="tool-pill-dot" />
+              <div className="tool-pill-dot" />
+              <div className="tool-pill-dot" />
+              <span>{meta.loading}…</span>
+            </div>
+          );
         })}
+
+        {/* Completed Tools - grouped chip */}
+        {completedTools.length > 0 && (
+          <div className="tool-done-group">
+            <button className="tool-done-chip" onClick={() => setShowToolDetails(!showToolDetails)}>
+              {failedTools.length > 0
+                ? <><span className="tool-chip-fail-dot"/>  {failedTools.length} action{failedTools.length > 1 ? 's' : ''} failed</>
+                : <><span className="tool-chip-ok-dot"/> {completedTools.length} action{completedTools.length > 1 ? 's' : ''} completed</>
+              }
+              <span className="tool-chip-arrow">{showToolDetails ? '▴' : '▾'}</span>
+            </button>
+            {showToolDetails && (
+              <div className="tool-done-details">
+                {completedTools.map((t: any) => {
+                  const m = getToolMeta(t.toolName);
+                  const ok = t.result?.success !== false;
+                  return (
+                    <div key={t.toolCallId} className="tool-done-row">
+                      <span>{ok ? '✓' : '✕'}</span>
+                      <span>{m.icon} {m.done}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
