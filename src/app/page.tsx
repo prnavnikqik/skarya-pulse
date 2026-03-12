@@ -257,6 +257,7 @@ export default function PulsePage() {
                   setActiveDocument={setActiveDocument} 
                   isLoading={homeStatus === 'submitted' || homeStatus === 'streaming'}
                   messagesEndRef={messagesEndRef}
+                  fillAndSend={fillAndSend}
                 />
              )}
            </div>
@@ -277,6 +278,7 @@ export default function PulsePage() {
                   setActiveDocument={setActiveDocument} 
                   isLoading={standupStatus === 'submitted' || standupStatus === 'streaming'}
                   messagesEndRef={messagesEndRef}
+                  fillAndSend={fillAndSend}
                 />
            </div>
 

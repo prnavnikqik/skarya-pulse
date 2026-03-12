@@ -292,7 +292,7 @@ export function SettingsView() {
       <div className="psb mb-6">Standup format & mediator flow configuration</div>
       
       <div className="setblk">
-        <div className="settl text-indigo-600 font-bold mb-3">Team Definition & Scope</div>
+        <div className="settl text-[var(--a2)] font-bold mb-3">Team Definition & Scope</div>
         <div className="setrow cursor-pointer" onClick={(e) => e.currentTarget.querySelector('.tog')?.classList.toggle('on')}>
           <div><div className="setl">Workspace is the Team</div><div className="sets">Aggregate standups across all members in the entire workspace. Best for small startup teams.</div></div>
           <div className="tog"></div>
@@ -308,7 +308,7 @@ export function SettingsView() {
       </div>
 
       <div className="setblk mt-8">
-        <div className="settl text-indigo-600 font-bold mb-3">Standup Approach</div>
+        <div className="settl text-[var(--a2)] font-bold mb-3">Standup Approach</div>
         <div className="setrow cursor-pointer" onClick={(e) => e.currentTarget.querySelector('.tog')?.classList.toggle('on')}>
           <div><div className="setl">Continuous Updates</div><div className="sets">Team members can post updates anytime throughout the day. Summaries aggregate everything asynchronously.</div></div>
           <div className="tog on"></div>
@@ -320,7 +320,7 @@ export function SettingsView() {
       </div>
       
       <div className="setblk mt-8">
-        <div className="settl text-indigo-600 font-bold mb-3">AI Behaviour</div>
+        <div className="settl text-[var(--a2)] font-bold mb-3">AI Behaviour</div>
         <div className="setrow cursor-pointer" onClick={(e) => e.currentTarget.querySelector('.tog')?.classList.toggle('on')}>
           <div><div className="setl">Auto-generate summaries</div><div className="sets">Summarise the aggregated team updates automatically at the end of the day.</div></div>
           <div className="tog on"></div>

@@ -27,7 +27,7 @@ export const HomeView = ({ fillAndSend, user, startStandup }: any) => (
       </div>
       <div className="qc" onClick={() => fillAndSend('Summarise today\'s session and extract all action items.')}>
         <div className="qi qi-pu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
-        <div className="ql">Summarise & Extract Actions</div>
+        <div className="ql">Summarise &amp; Extract Actions</div>
       </div>
       <div className="qc" onClick={() => fillAndSend('What are all active blockers and what are your recommended resolutions for each?')}>
         <div className="qi qi-r"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg></div>
@@ -164,136 +164,196 @@ const MUTATION_TOOLS = [
   'draft_document', 'update_task_priority', 'set_task_dates', 'assign_task'
 ];
 
-const ChatMessage = ({ msg, TEST_USER, addToolResult, setActiveDocument }: MessageProps) => {
+const ChatMessage = ({ msg, TEST_USER, addToolResult, setActiveDocument, fillAndSend, isLastAi }: MessageProps & { fillAndSend?: any; isLastAi?: boolean }) => {
   const [showToolDetails, setShowToolDetails] = React.useState(false);
+  const [copied, setCopied] = React.useState(false);
 
-  const getInitials = (name: string) => {
-    if (!name) return 'ME';
-    return name.substring(0, 2).toUpperCase();
-  };
-
-  const userInitials = TEST_USER ? getInitials(TEST_USER.userName) : 'ME';
+  const userInitials = TEST_USER ? (TEST_USER.userName || 'ME').substring(0, 2).toUpperCase() : 'ME';
 
   const invocations: any[] = msg.toolInvocations || [];
-  const completedTools = invocations.filter(t => t.result);
-  const pendingTools = invocations.filter(t => !t.result);
-  const failedTools = completedTools.filter(t => t.result && !t.result.success);
+  const completedTools = invocations.filter((t: any) => t.result);
+  const pendingTools = invocations.filter((t: any) => !t.result);
+  const failedTools = completedTools.filter((t: any) => t.result && !t.result.success);
 
+  const contentText = typeof msg.content === 'string'
+    ? msg.content
+    : (Array.isArray(msg.content) ? msg.content.map((p: any) => p.text || '').join('\n') : String(msg.content || ''));
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(contentText);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  // Contextual follow-up suggestions for the last AI message
+  const followUps = React.useMemo(() => {
+    if (!isLastAi || !contentText || msg.role === 'user') return [];
+    const lower = contentText.toLowerCase();
+    const suggestions: string[] = [];
+    if (lower.includes('overdue') || lower.includes('blocker'))
+      suggestions.push('Show me the overdue tasks and who owns them');
+    if (lower.includes('sprint') || lower.includes('velocity'))
+      suggestions.push('Break down the sprint by individual contributor');
+    if (lower.includes('task') || lower.includes('assigned'))
+      suggestions.push('What are my top priority tasks right now?');
+    if (lower.includes('risk') || lower.includes('deadline'))
+      suggestions.push('Which tasks should I escalate today?');
+    if (suggestions.length === 0) {
+      suggestions.push('Summarise this as action items');
+      suggestions.push('What should I focus on next?');
+    }
+    return suggestions.slice(0, 3);
+  }, [isLastAi, contentText, msg.role]);
+
+  // ─── User message ───
+  if (msg.role === 'user') {
+    return (
+      <div className="msg u">
+        <div className="msg-u-row">
+          <div className="msg-u-bubble">{contentText}</div>
+        </div>
+      </div>
+    );
+  }
+
+  // ─── AI message (ClickUp Brain style) ───
   return (
-    <div className={`msg ${msg.role === 'user' ? 'u' : 'ai-msg'}`}>
-      <div className={`av ${msg.role === 'user' ? 'u' : 'ai'}`}>
-        {msg.role === 'user' ? userInitials : 'SP'}
+    <div className="msg ai-msg">
+      <div className="ai-msg-header">
+        <div className="ai-msg-avatar">✦</div>
+        <span className="ai-msg-name">Pulse</span>
       </div>
 
-      <div className={`bbl ${msg.role === 'user' ? 'u' : 'ai'}`}>
-        {/* Message Text */}
-        {msg.content && (
-          <div className="prose prose-sm max-w-none text-inherit prose-p:leading-relaxed">
-            <ReactMarkdown>
-              {typeof msg.content === 'string' ? msg.content : (Array.isArray(msg.content) ? msg.content.map((p: any) => p.text || '').join('\n') : String(msg.content))}
-            </ReactMarkdown>
-          </div>
-        )}
-
-        {/* Pending Tools - loading pill per tool */}
-        {pendingTools.map((toolInvocation: any) => {
-          const { toolCallId, toolName, args } = toolInvocation;
-          const meta = getToolMeta(toolName);
-
-          if (MUTATION_TOOLS.includes(toolName)) {
+      {/* Pending Tools */}
+      {pendingTools.length > 0 && (
+        <div className="ai-msg-tools">
+          {pendingTools.map((toolInvocation: any) => {
+            const { toolCallId, toolName, args } = toolInvocation;
+            const meta = getToolMeta(toolName);
+            if (MUTATION_TOOLS.includes(toolName)) {
+              return (
+                <div key={toolCallId} className="tool-confirm-card">
+                  <div className="tool-confirm-hd">
+                    <span className="tool-confirm-icon">✦</span>
+                    <span className="tool-confirm-label">Ready to {meta.loading.toLowerCase()}. Confirm?</span>
+                  </div>
+                  <details className="tool-confirm-args">
+                    <summary className="tool-confirm-sum">View details</summary>
+                    <pre>{JSON.stringify(args, null, 2)}</pre>
+                  </details>
+                  <div className="tool-confirm-btns">
+                    <button onClick={async () => {
+                        const res = await executeSkaryaAction(toolName, { ...args, _authMeta: TEST_USER });
+                        addToolResult({ toolCallId, result: res } as any);
+                        if (toolName === 'draft_document' && res.success) setActiveDocument({ title: args.title, content: args.content });
+                      }} className="tool-btn-confirm">{meta.icon} Confirm</button>
+                    <button onClick={() => addToolResult({ toolCallId, result: { success: false, error: 'Cancelled' } } as any)} className="tool-btn-cancel">Cancel</button>
+                  </div>
+                </div>
+              );
+            }
             return (
-              <div key={toolCallId} className="tool-confirm-card">
-                <div className="tool-confirm-hd">
-                  <span className="tool-confirm-icon">✦</span>
-                  <span className="tool-confirm-label">Ready to {meta.loading.toLowerCase()}. Confirm?</span>
-                </div>
-                <details className="tool-confirm-args">
-                  <summary className="tool-confirm-sum">View details</summary>
-                  <pre>{JSON.stringify(args, null, 2)}</pre>
-                </details>
-                <div className="tool-confirm-btns">
-                  <button
-                    onClick={async () => {
-                      const res = await executeSkaryaAction(toolName, { ...args, _authMeta: TEST_USER });
-                      addToolResult({ toolCallId, result: res } as any);
-                      if (toolName === 'draft_document' && res.success) {
-                        setActiveDocument({ title: args.title, content: args.content });
-                      }
-                    }}
-                    className="tool-btn-confirm"
-                  >
-                    {meta.icon} Confirm
-                  </button>
-                  <button
-                    onClick={() => addToolResult({ toolCallId, result: { success: false, error: 'Cancelled' } } as any)}
-                    className="tool-btn-cancel"
-                  >
-                    Cancel
-                  </button>
-                </div>
+              <div key={toolCallId} className="tool-loading-pill">
+                <div className="tool-pill-dot" /><div className="tool-pill-dot" /><div className="tool-pill-dot" />
+                <span>{meta.loading}…</span>
               </div>
             );
-          }
+          })}
+        </div>
+      )}
 
-          return (
-            <div key={toolCallId} className="tool-loading-pill">
-              <div className="tool-pill-dot" />
-              <div className="tool-pill-dot" />
-              <div className="tool-pill-dot" />
-              <span>{meta.loading}…</span>
+      {/* AI Text Content */}
+      {contentText && (
+        <div className="ai-msg-body">
+          <ReactMarkdown>{contentText}</ReactMarkdown>
+        </div>
+      )}
+
+      {/* Completed Tools chip */}
+      {completedTools.length > 0 && (
+        <div className="tool-done-group">
+          <button className="tool-done-chip" onClick={() => setShowToolDetails(!showToolDetails)}>
+            {failedTools.length > 0
+              ? <><span className="tool-chip-fail-dot" /> {failedTools.length} failed</>
+              : <><span className="tool-chip-ok-dot" /> {completedTools.length} action{completedTools.length > 1 ? 's' : ''} completed</>}
+            <span className="tool-chip-arrow">{showToolDetails ? '▴' : '▾'}</span>
+          </button>
+          {showToolDetails && (
+            <div className="tool-done-details">
+              {completedTools.map((t: any) => {
+                const m = getToolMeta(t.toolName);
+                return (<div key={t.toolCallId} className="tool-done-row"><span>{t.result?.success !== false ? '✓' : '✕'}</span><span>{m.icon} {m.done}</span></div>);
+              })}
             </div>
-          );
-        })}
+          )}
+        </div>
+      )}
 
-        {/* Completed Tools - grouped chip */}
-        {completedTools.length > 0 && (
-          <div className="tool-done-group">
-            <button className="tool-done-chip" onClick={() => setShowToolDetails(!showToolDetails)}>
-              {failedTools.length > 0
-                ? <><span className="tool-chip-fail-dot"/>  {failedTools.length} action{failedTools.length > 1 ? 's' : ''} failed</>
-                : <><span className="tool-chip-ok-dot"/> {completedTools.length} action{completedTools.length > 1 ? 's' : ''} completed</>
-              }
-              <span className="tool-chip-arrow">{showToolDetails ? '▴' : '▾'}</span>
+      {/* Action Bar */}
+      {contentText && (
+        <div className="ai-actions">
+          <button className="ai-act-btn" onClick={handleCopy} title="Copy">
+            {copied
+              ? <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12"/></svg>
+              : <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>}
+          </button>
+          <div className="ai-act-sep" />
+          <button className="ai-act-btn" title="Regenerate" onClick={() => fillAndSend?.('Regenerate the last response with more detail')}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          </button>
+          <button className="ai-act-btn" title="Good response">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+          </button>
+          <button className="ai-act-btn" title="Bad response">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10 15V19a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/></svg>
+          </button>
+        </div>
+      )}
+
+      {/* Follow-up Suggestions */}
+      {isLastAi && followUps.length > 0 && (
+        <div className="ai-followups">
+          <div className="ai-followups-label">Follow ups</div>
+          {followUps.map((q, i) => (
+            <button key={i} className="ai-followup-btn" onClick={() => fillAndSend?.(q)}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg>
+              {q}
             </button>
-            {showToolDetails && (
-              <div className="tool-done-details">
-                {completedTools.map((t: any) => {
-                  const m = getToolMeta(t.toolName);
-                  const ok = t.result?.success !== false;
-                  return (
-                    <div key={t.toolCallId} className="tool-done-row">
-                      <span>{ok ? '✓' : '✕'}</span>
-                      <span>{m.icon} {m.done}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
 
-export const MessagesList = ({ messages, TEST_USER, addToolResult, setActiveDocument, isLoading, messagesEndRef }: any) => {
+export const MessagesList = ({ messages, TEST_USER, addToolResult, setActiveDocument, isLoading, messagesEndRef, fillAndSend }: any) => {
+  let lastAiIdx = -1;
+  for (let i = messages.length - 1; i >= 0; i--) {
+    if (messages[i].role === 'assistant') { lastAiIdx = i; break; }
+  }
+
   return (
     <div className="msgs custom-scrollbar">
       <div className="dlbl">{new Date().toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' })}</div>
       {messages.map((m: any, idx: number) => (
-        <ChatMessage 
-          key={m.id || idx} 
-          msg={m} 
-          TEST_USER={TEST_USER} 
-          addToolResult={addToolResult} 
-          setActiveDocument={setActiveDocument} 
+        <ChatMessage
+          key={m.id || idx}
+          msg={m}
+          TEST_USER={TEST_USER}
+          addToolResult={addToolResult}
+          setActiveDocument={setActiveDocument}
+          fillAndSend={fillAndSend}
+          isLastAi={idx === lastAiIdx && !isLoading}
         />
       ))}
       {isLoading && (
         <div className="msg ai-msg">
-          <div className="av ai">SP</div>
-          <div className="bbl ai">
-             <div className="typing-wrap"><div className="tpulse"><span></span><span></span><span></span></div><span className="typing-label">Pulse is thinking…</span></div>
+          <div className="ai-msg-header">
+            <div className="ai-msg-avatar">✦</div>
+            <span className="ai-msg-name">Pulse</span>
+          </div>
+          <div className="ai-msg-body">
+            <div className="typing-wrap"><div className="tpulse"><span></span><span></span><span></span></div><span className="typing-label">Pulse is thinking…</span></div>
           </div>
         </div>
       )}
