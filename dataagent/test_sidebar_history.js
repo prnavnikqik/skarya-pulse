@@ -4,8 +4,8 @@ const puppeteer = require('puppeteer');
     const browser = await puppeteer.launch({ headless: "new" });
     const page = await browser.newPage();
 
-    await page.goto('http://localhost:5656/pulse', { waitUntil: 'networkidle0' });
-    console.log("Loaded /pulse");
+    await page.goto('http://localhost:5656/', { waitUntil: 'networkidle0' });
+    console.log("Loaded /");
 
     // Wait for sidebar
     await page.waitForSelector('.ni');

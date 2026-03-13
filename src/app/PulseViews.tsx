@@ -166,25 +166,25 @@ function formatToolArgs(toolName: string, args: any) {
     ),
     update_task_status: () => (
       <div className="conf-args">
-        <div className="conf-arg"><strong>Task:</strong> #{args.taskNumber}</div>
+        <div className="conf-arg"><strong>Task:</strong> #{args.taskNumber || (args.taskId ? String(args.taskId).substring(0, 6) + '...' : 'Unknown')}</div>
         <div className="conf-arg"><strong>New Status:</strong> {args.status}</div>
       </div>
     ),
     update_task_priority: () => (
       <div className="conf-args">
-        <div className="conf-arg"><strong>Task:</strong> #{args.taskNumber}</div>
+        <div className="conf-arg"><strong>Task:</strong> #{args.taskNumber || (args.taskId ? String(args.taskId).substring(0, 6) + '...' : 'Unknown')}</div>
         <div className="conf-arg"><strong>Priority:</strong> {args.priority}</div>
       </div>
     ),
     add_task_comment: () => (
       <div className="conf-args">
-        <div className="conf-arg"><strong>Task:</strong> #{args.taskNumber}</div>
+        <div className="conf-arg"><strong>Task:</strong> #{args.taskNumber || (args.taskId ? String(args.taskId).substring(0, 6) + '...' : 'Unknown')}</div>
         <div className="conf-arg"><strong>Comment:</strong> "{args.comment}"</div>
       </div>
     ),
     assign_task: () => (
       <div className="conf-args">
-        <div className="conf-arg"><strong>Task:</strong> #{args.taskNumber}</div>
+        <div className="conf-arg"><strong>Task:</strong> #{args.taskNumber || (args.taskId ? String(args.taskId).substring(0, 6) + '...' : 'Unknown')}</div>
         <div className="conf-arg"><strong>New Assignee:</strong> {args.assigneeEmail}</div>
       </div>
     ),
@@ -208,7 +208,7 @@ function formatToolArgs(toolName: string, args: any) {
     ),
     set_task_dates: () => (
       <div className="conf-args">
-        <div className="conf-arg"><strong>Task:</strong> #{args.taskNumber}</div>
+        <div className="conf-arg"><strong>Task:</strong> #{args.taskNumber || (args.taskId ? String(args.taskId).substring(0, 6) + '...' : 'Unknown')}</div>
         {args.startDate && <div className="conf-arg"><strong>Start:</strong> {args.startDate}</div>}
         {args.dueDate && <div className="conf-arg"><strong>Due:</strong> {args.dueDate}</div>}
       </div>

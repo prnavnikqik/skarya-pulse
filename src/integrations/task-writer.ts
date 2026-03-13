@@ -122,7 +122,7 @@ export class TaskWriter {
     public static async assignTask(taskId: string, taskNumber: string, assigneeEmail: string): Promise<WritebackResult> {
         try {
             const response = await skaryaClient.patch(`/api/boardTask/updateBoardTask?id=${taskId}`, {
-                assigneePrimary: assigneeEmail
+                assigneePrimary: { email: assigneeEmail, name: 'User' }
             });
             if (response.success) {
                 return { operation: `Assign ${taskNumber} to ${assigneeEmail}`, status: 'success' };
@@ -141,7 +141,7 @@ export class TaskWriter {
             const payload = {
                 name: task.name,
                 description: '',
-                assigneePrimary: task.assigneeEmail,
+                assigneePrimary: task.assigneeEmail ? { email: task.assigneeEmail, name: 'User' } : null,
                 assigneeGroup: null,
                 collaborators: [],
                 startDate: new Date().toISOString(),

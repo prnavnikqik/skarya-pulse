@@ -20,11 +20,20 @@ export async function executeSkaryaAction(toolName: string, args: Record<string,
     if (toolName === 'update_task_status') {
       // Security Validation: Cross-reference Assignee
       if (authMeta) {
-        const { TaskReader } = await import('@/integrations/task-reader');
-        const userTasks = await TaskReader.fetchUserTasks(authMeta.boardId, authMeta.workspaceId, authMeta.userEmail);
-        const taskBelongsToUser = userTasks.some(t => String(t._id) === String(args.taskId) || String(t.taskNumber) === String(args.taskNumber));
-        if (!taskBelongsToUser) {
-          throw new Error(`Unauthorized: You cannot update a task assigned to someone else.`);
+        const { skaryaClient } = await import('@/integrations/skarya-client');
+        const tasksRes = await skaryaClient.get<any>('/api/boardTask/getBoardTask', { boardId: authMeta.boardId, workspaceId: authMeta.workspaceId });
+        if (tasksRes.success && tasksRes.data) {
+          const allTasks = Array.isArray(tasksRes.data) ? tasksRes.data : tasksRes.data.tasks || [];
+          const taskObj = allTasks.find((t: any) => String(t._id) === String(args.taskId) || String(t.taskNumber) === String(args.taskNumber));
+          if (taskObj) {
+            const assigneeEmail = taskObj.assigneePrimary?.email?.toLowerCase();
+            const isUnassigned = !assigneeEmail;
+            const isMine = assigneeEmail === authMeta.userEmail.toLowerCase() || taskObj.collaborators?.some((c: any) => c.email?.toLowerCase() === authMeta.userEmail.toLowerCase());
+            
+            if (!isMine && !isUnassigned) {
+              throw new Error(`Unauthorized: You cannot update a task assigned to someone else.`);
+            }
+          }
         }
       }
 
@@ -128,6 +137,27 @@ export async function executeSkaryaAction(toolName: string, args: Record<string,
         createdBy: authMeta?.userEmail || 'Unknown'
       });
       return { success: result.status === 'success', result };
+    }
+
+    // ─── PERSIST STANDUP ──────────────────────────────────────────────────────
+    if (toolName === 'persist_standup') {
+      const { boardId, workspaceId } = getBoardCtx();
+      if (!args.yesterday || !args.today) throw new Error('Missing required fields for standup.');
+      
+      const connectToDatabase = (await import('@/lib/mongoose')).default;
+      const Standup = (await import('@/models/Standup')).default;
+      
+      await connectToDatabase();
+      const newStandup = await Standup.create({
+        userEmail: authMeta?.userEmail || 'unknown',
+        boardId,
+        workspaceId,
+        yesterday: String(args.yesterday),
+        today: String(args.today),
+        blockers: String(args.blockers || 'None'),
+        summary: args.summary ? String(args.summary) : ''
+      });
+      return { success: true, newStandup };
     }
 
     // ─── DRAFT DOCUMENT ───────────────────────────────────────────────────────

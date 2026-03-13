@@ -114,21 +114,7 @@ function getAllAgentTools(boardId: string, workspaceId: string, userEmail: strin
                 status: z.string().describe('The new status (Done, In Progress, etc.)'),
                 statusCategory: z.enum(['not_started', 'in_progress', 'completed']),
                 percentageCompletion: z.number().optional()
-            }),
-            execute: async (args) => {
-                try {
-                    const result = await TaskWriter.updateTaskStatus({
-                        _id: args.taskId,
-                        taskNumber: args.taskNumber,
-                        status: args.status,
-                        statusCategory: args.statusCategory,
-                        percentageCompletion: args.percentageCompletion
-                    });
-                    return { success: result.status === 'success', result };
-                } catch (err: any) {
-                    return { success: false, error: err.message };
-                }
-            }
+            })
         }),
 
         update_task_priority: tool({
@@ -137,15 +123,7 @@ function getAllAgentTools(boardId: string, workspaceId: string, userEmail: strin
                 taskId: z.string(),
                 taskNumber: z.string(),
                 priority: z.enum(['Low', 'Medium', 'High', 'Critical'])
-            }),
-            execute: async (args) => {
-                try {
-                    const result = await TaskWriter.updateTaskPriority(args.taskId, args.taskNumber, args.priority);
-                    return { success: result.status === 'success', result };
-                } catch (err: any) {
-                    return { success: false, error: err.message };
-                }
-            }
+            })
         }),
 
         set_task_dates: tool({
@@ -155,15 +133,7 @@ function getAllAgentTools(boardId: string, workspaceId: string, userEmail: strin
                 taskNumber: z.string(),
                 startDate: z.string().optional(),
                 dueDate: z.string().optional()
-            }),
-            execute: async (args) => {
-                try {
-                    const result = await TaskWriter.setTaskDates(args.taskId, args.taskNumber, args.startDate, args.dueDate);
-                    return { success: result.status === 'success', result };
-                } catch (err: any) {
-                    return { success: false, error: err.message };
-                }
-            }
+            })
         }),
 
         assign_task: tool({
@@ -172,15 +142,7 @@ function getAllAgentTools(boardId: string, workspaceId: string, userEmail: strin
                 taskId: z.string(),
                 taskNumber: z.string(),
                 assigneeEmail: z.string()
-            }),
-            execute: async (args) => {
-                try {
-                    const result = await TaskWriter.assignTask(args.taskId, args.taskNumber, args.assigneeEmail);
-                    return { success: result.status === 'success', result };
-                } catch (err: any) {
-                    return { success: false, error: err.message };
-                }
-            }
+            })
         }),
 
         add_task_comment: tool({
@@ -190,18 +152,7 @@ function getAllAgentTools(boardId: string, workspaceId: string, userEmail: strin
                 taskNumber: z.string(),
                 comment: z.string(),
                 label: z.enum(['Progress Update', 'Blocker'])
-            }),
-            execute: async (args) => {
-                try {
-                    const result = await TaskWriter.addTaskComment(
-                        { taskId: args.taskId, taskNumber: args.taskNumber, comment: args.comment },
-                        args.label
-                    );
-                    return { success: result.status === 'success', result };
-                } catch (err: any) {
-                    return { success: false, error: err.message };
-                }
-            }
+            })
         }),
 
         create_task: tool({
@@ -210,23 +161,7 @@ function getAllAgentTools(boardId: string, workspaceId: string, userEmail: strin
                 name: z.string(),
                 priority: z.enum(['Low', 'Medium', 'High', 'Critical']).optional(),
                 assigneeEmail: z.string().optional()
-            }),
-            execute: async (args) => {
-                try {
-                    const result = await TaskWriter.createTask({
-                        name: args.name,
-                        boardId,
-                        workspaceId,
-                        assigneeEmail: args.assigneeEmail || userEmail,
-                        status: 'To Do',
-                        priority: args.priority || 'Medium',
-                        createdBy: userEmail
-                    });
-                    return { success: result.status === 'success', result };
-                } catch (err: any) {
-                    return { success: false, error: err.message };
-                }
-            }
+            })
         }),
 
         create_subtask: tool({
@@ -236,24 +171,7 @@ function getAllAgentTools(boardId: string, workspaceId: string, userEmail: strin
                 name: z.string(),
                 priority: z.enum(['Low', 'Medium', 'High', 'Critical']).optional(),
                 assigneeEmail: z.string().optional()
-            }),
-            execute: async (args) => {
-                try {
-                    const result = await TaskWriter.createSubtask({
-                        parentTaskId: args.parentTaskId,
-                        name: args.name,
-                        boardId,
-                        workspaceId,
-                        assigneeEmail: args.assigneeEmail || userEmail,
-                        status: 'To Do',
-                        priority: args.priority || 'Medium',
-                        createdBy: userEmail
-                    });
-                    return { success: result.status === 'success', result };
-                } catch (err: any) {
-                    return { success: false, error: err.message };
-                }
-            }
+            })
         }),
 
         auto_generate_subtasks: tool({
@@ -449,16 +367,7 @@ function getAllAgentTools(boardId: string, workspaceId: string, userEmail: strin
                 today: z.string().describe('Plan for today'),
                 blockers: z.string().describe('Any blockers or roadblocks (use "None" if clear)'),
                 summary: z.string().optional().describe('Brief executive summary')
-            }),
-            execute: async (args) => {
-                try {
-                    await connectToDatabase();
-                    await Standup.create({ userEmail, workspaceId, boardId, ...args });
-                    return { success: true };
-                } catch (err: any) {
-                    return { success: false, error: err.message };
-                }
-            }
+            })
         }),
 
         draft_document: tool({

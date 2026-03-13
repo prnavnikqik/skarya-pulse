@@ -1,0 +1,43 @@
+{
+  "finalUrl": "https://pulse.karyaa.ai/post/myDay",
+  "setCookieLog": [],
+  "byDomain": {
+    "pulse.karyaa.ai": [
+      "__Secure-next-auth.callback-url",
+      "__Host-next-auth.csrf-token",
+      "__Secure-next-auth.session-token"
+    ]
+  },
+  "allCookies": [
+    {
+      "name": "__Secure-next-auth.callback-url",
+      "value": "https%3A%2F%2Fauth.karyaa.ai",
+      "domain": "pulse.karyaa.ai",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "__Host-next-auth.csrf-token",
+      "value": "28db83792a40421c91238750cd34c3cfdd9be25af920b1b5915b152285eec511%7C2666ff6389a774bd1d8fffbf2d3cf060e697006643198fcb6471e5a34ff4b24f",
+      "domain": "pulse.karyaa.ai",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "__Secure-next-auth.session-token",
+      "value": "eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0..-Xeb8TuVFbE_X2Rx.d0GjYDXq6nXBoxJhXWpgILl9S_k8Bdn4TThfLBP2D3BP-SO5TZy49YZQs8gOkNPbGs40nLAcdxDqWI9wENwQyM1ymJG1kIMdLRqpmJzEyWvt5dW3IEPnYPy-4TECg9kfemjdE4hDTyQ61LBmZU2uDEmsFTRbjig1xAYj-haCKWkBzYB8s70v0Hq1SaAYSX9DMZkjom7QB2krNe59ff3KYX9PKQNTMbCdyCH0Bn17I-jCq1nkFjDMWpy0_i0iNjK-6qGEuctEmFsrT4c7b-dwXHxnUNe5YjbSF5qC8gO7NF2DIWokTQoenMAVxtYr-HlrKQWeWPmDpvgbVhMwICTP5lmNQwAfb6cxXWs0LBN5cQ4u50ITA9St7RiMYHibSqmKzu_BApZUsAC5iCvhsLfrRVv1IrzQZuvgJ_hvFbLAbwdOfPNrgURX4nkkqeKyxxBpKRLKIEXP-3KUrYofYLIXlkU.wJAsxT-kAeNB-FivyigdMg",
+      "domain": "pulse.karyaa.ai",
+      "path": "/",
+      "expires": 1773395470.863137,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "Lax"
+    }
+  ]
+}
