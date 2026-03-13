@@ -102,6 +102,11 @@ export async function executeSkaryaAction(toolName: string, args: Record<string,
         new_subtasks_to_create: [],
         notifications_to_send: [],
         summary_for_lead: ''
+      }, {
+        userEmail: authMeta?.userEmail || '',
+        userName: authMeta?.userEmail?.split('@')[0] || 'User', // Fallback for name
+        workspaceId: String(args.workspaceId || authMeta?.workspaceId || ''),
+        boardId: String(args.boardId || authMeta?.boardId || '')
       });
       return { success: true, results };
     }

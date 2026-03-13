@@ -9,7 +9,7 @@ export class TaskWriter {
      * Main entry point to apply all confirmed changes.
      * Operations are independent; one failure doesn't block others.
      */
-    static async applyUpdates(output: StandupOutput): Promise<WritebackResult[]> {
+    static async applyUpdates(output: StandupOutput, context?: { userEmail: string, userName: string, workspaceId: string, boardId: string }): Promise<WritebackResult[]> {
         const results: WritebackResult[] = [];
 
         // 1. Task Updates (Status / Progress)
@@ -20,13 +20,13 @@ export class TaskWriter {
 
         // 2. Progress Comments
         for (const comment of output.progress_comments) {
-            const res = await this.addTaskComment(comment, 'Progress Update');
+            const res = await this.addTaskComment(comment, 'Progress Update', context);
             results.push(res);
         }
 
         // 3. Roadblock Comments
         for (const comment of output.roadblock_comments) {
-            const res = await this.addTaskComment(comment, 'Blocker');
+            const res = await this.addTaskComment(comment, 'Blocker', context);
             results.push(res);
 
             // If requested, we could trigger a notification here
@@ -57,7 +57,6 @@ export class TaskWriter {
             // Inferred endpoint from HAR reference for updating task: PATCH /api/boardTask/updateBoardTask
             const response = await skaryaClient.put(`/api/boardTask/updateBoardTask?id=${update._id}`, {
                 status: update.status,
-                statusCategory: update.statusCategory,
                 percentageCompletion: update.percentageCompletion
             });
 
@@ -70,15 +69,26 @@ export class TaskWriter {
         }
     }
 
-    public static async addTaskComment(comment: TaskComment, label: string): Promise<WritebackResult> {
+    public static async addTaskComment(comment: TaskComment, label: string, context?: { userEmail: string, userName: string, workspaceId: string, boardId: string }): Promise<WritebackResult> {
         try {
-            // Updated endpoint from HAR: POST /api/boardTaskComment/createBoardTaskComment
-            const response = await skaryaClient.post(`/api/boardTaskComment/createBoardTaskComment`, {
-                boardTaskId: comment.taskId,
-                text: `**${label}:** ${comment.comment}`,
-                isEdited: false,
-                isRoadBlock: label === 'Blocker'
-            });
+            const boardId = context?.boardId;
+            const workspaceId = context?.workspaceId;
+            const taskId = comment.taskId;
+
+            if (!boardId || !workspaceId) {
+                return { operation: `Comment on ${comment.taskNumber}`, status: 'failed', error: 'Missing boardId or workspaceId context' };
+            }
+
+            // HAR verified signature: POST /api/boardTaskComment/createBoardTaskComment?boardId=...&taskId=...&workspaceId=...
+            const response = await skaryaClient.post(
+                `/api/boardTaskComment/createBoardTaskComment?boardId=${boardId}&taskId=${taskId}&workspaceId=${workspaceId}`, 
+                {
+                    text: `**${label}:** ${comment.comment}`,
+                    user: context?.userEmail || 'system',
+                    userName: context?.userName || 'Mediator',
+                    timestamp: new Date().toISOString()
+                }
+            );
 
             if (response.success) {
                 return { operation: `Comment on ${comment.taskNumber}`, status: 'success' };
