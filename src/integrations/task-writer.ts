@@ -203,7 +203,11 @@ export class TaskWriter {
                 createdBy: subtask.createdBy || 'Unknown User'
             };
 
-            const response = await skaryaClient.post(`${endpoint}?boardId=${subtask.boardId || '69a2118ecf1d73e568280ba5'}&workspaceId=${subtask.workspaceId || '69a202afcf1d73e568280529'}`, payload);
+            if (!subtask.boardId || !subtask.workspaceId) {
+                throw new Error("Missing boardId or workspaceId for subtask creation.");
+            }
+
+            const response = await skaryaClient.post(`${endpoint}?boardId=${subtask.boardId}&workspaceId=${subtask.workspaceId}`, payload);
 
             if (response.success) {
                 return { operation: `Create Subtask: ${subtask.name}`, status: 'success' };

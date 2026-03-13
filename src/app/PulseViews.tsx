@@ -27,15 +27,15 @@ export const HomeView = ({ fillAndSend, user, startStandup }: any) => (
       </div>
       <div className="qc" onClick={() => fillAndSend('Summarise today\'s session and extract all action items.')}>
         <div className="qi qi-pu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
-        <div className="ql">Summarise &amp; Extract Actions</div>
+        <div className="ql">Summarise &amp; Actions</div>
       </div>
       <div className="qc" onClick={() => fillAndSend('What are all active blockers and what are your recommended resolutions for each?')}>
         <div className="qi qi-r"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg></div>
-        <div className="ql">Review Active Blockers</div>
+        <div className="ql">Active Blockers</div>
       </div>
       <div className="qc" onClick={() => fillAndSend('Draft a full sprint report: velocity, completed tasks, blockers, risks, and highlights.')}>
         <div className="qi qi-am"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
-        <div className="ql">Draft Sprint Report</div>
+        <div className="ql">Sprint Report</div>
       </div>
       <div className="qc" onClick={() => fillAndSend('Give me a team performance analysis with actionable insights.')}>
         <div className="qi qi-g"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
@@ -43,7 +43,7 @@ export const HomeView = ({ fillAndSend, user, startStandup }: any) => (
       </div>
       <div className="qc" onClick={() => fillAndSend('Which tasks are at risk this sprint? Identify and suggest next steps.')}>
         <div className="qi qi-pk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
-        <div className="ql">Identify At-Risk Work</div>
+        <div className="ql">At-Risk Work</div>
       </div>
     </div>
   </div>
@@ -149,8 +149,75 @@ const TOOL_META: Record<string, { loading: string; done: string; icon: string }>
   assign_task:            { loading: 'Assigning task',            done: 'Task assigned',             icon: '👤' },
   add_task_comment:       { loading: 'Adding comment',            done: 'Comment added',             icon: '💬' },
   create_subtask:         { loading: 'Creating subtask',          done: 'Subtask created',           icon: '📌' },
+  auto_generate_subtasks: { loading: 'Generating subtask ideas', done: 'Subtasks suggested',        icon: '💡' },
   draft_document:         { loading: 'Drafting document',         done: 'Document drafted',          icon: '📝' },
+  persist_standup:        { loading: 'Persisting standup',        done: 'Standup saved ✓',           icon: '💾' },
 };
+
+function formatToolArgs(toolName: string, args: any) {
+  if (!args) return '';
+  const entries: any = {
+    create_task: () => (
+      <div className="conf-args">
+        <div className="conf-arg"><strong>Name:</strong> {args.name}</div>
+        {args.priority && <div className="conf-arg"><strong>Priority:</strong> {args.priority}</div>}
+        {args.assigneeEmail && <div className="conf-arg"><strong>Assignee:</strong> {args.assigneeEmail}</div>}
+      </div>
+    ),
+    update_task_status: () => (
+      <div className="conf-args">
+        <div className="conf-arg"><strong>Task:</strong> #{args.taskNumber}</div>
+        <div className="conf-arg"><strong>New Status:</strong> {args.status}</div>
+      </div>
+    ),
+    update_task_priority: () => (
+      <div className="conf-args">
+        <div className="conf-arg"><strong>Task:</strong> #{args.taskNumber}</div>
+        <div className="conf-arg"><strong>Priority:</strong> {args.priority}</div>
+      </div>
+    ),
+    add_task_comment: () => (
+      <div className="conf-args">
+        <div className="conf-arg"><strong>Task:</strong> #{args.taskNumber}</div>
+        <div className="conf-arg"><strong>Comment:</strong> "{args.comment}"</div>
+      </div>
+    ),
+    assign_task: () => (
+      <div className="conf-args">
+        <div className="conf-arg"><strong>Task:</strong> #{args.taskNumber}</div>
+        <div className="conf-arg"><strong>New Assignee:</strong> {args.assigneeEmail}</div>
+      </div>
+    ),
+    create_subtask: () => (
+      <div className="conf-args">
+        <div className="conf-arg"><strong>Name:</strong> {args.name}</div>
+        <div className="conf-arg"><strong>Parent Task:</strong> {args.parentTaskId}</div>
+      </div>
+    ),
+    persist_standup: () => (
+      <div className="conf-args">
+        <div className="conf-arg"><strong>Yesterday:</strong> {args.yesterday}</div>
+        <div className="conf-arg"><strong>Today:</strong> {args.today}</div>
+        <div className="conf-arg"><strong>Blockers:</strong> {args.blockers}</div>
+      </div>
+    ),
+    draft_document: () => (
+      <div className="conf-args">
+        <div className="conf-arg"><strong>Title:</strong> {args.title}</div>
+      </div>
+    ),
+    set_task_dates: () => (
+      <div className="conf-args">
+        <div className="conf-arg"><strong>Task:</strong> #{args.taskNumber}</div>
+        {args.startDate && <div className="conf-arg"><strong>Start:</strong> {args.startDate}</div>}
+        {args.dueDate && <div className="conf-arg"><strong>Due:</strong> {args.dueDate}</div>}
+      </div>
+    )
+  };
+
+  if (entries[toolName]) return entries[toolName]();
+  return <pre className="conf-raw">{JSON.stringify(args, null, 2)}</pre>;
+}
 
 const getToolMeta = (toolName: string) =>
   TOOL_META[toolName] ?? {
@@ -161,7 +228,8 @@ const getToolMeta = (toolName: string) =>
 
 const MUTATION_TOOLS = [
   'create_task', 'update_task_status', 'add_task_comment', 'create_subtask',
-  'draft_document', 'update_task_priority', 'set_task_dates', 'assign_task'
+  'draft_document', 'update_task_priority', 'set_task_dates', 'assign_task',
+  'persist_standup'
 ];
 
 const ChatMessage = ({ msg, TEST_USER, addToolResult, setActiveDocument, fillAndSend, isLastAi }: MessageProps & { fillAndSend?: any; isLastAi?: boolean }) => {
@@ -237,10 +305,9 @@ const ChatMessage = ({ msg, TEST_USER, addToolResult, setActiveDocument, fillAnd
                     <span className="tool-confirm-icon">✦</span>
                     <span className="tool-confirm-label">Ready to {meta.loading.toLowerCase()}. Confirm?</span>
                   </div>
-                  <details className="tool-confirm-args">
-                    <summary className="tool-confirm-sum">View details</summary>
-                    <pre>{JSON.stringify(args, null, 2)}</pre>
-                  </details>
+                  <div className="tool-confirm-body">
+                    {formatToolArgs(toolName, args)}
+                  </div>
                   <div className="tool-confirm-btns">
                     <button onClick={async () => {
                         const res = await executeSkaryaAction(toolName, { ...args, _authMeta: TEST_USER });
@@ -349,7 +416,7 @@ export const MessagesList = ({ messages, TEST_USER, addToolResult, setActiveDocu
       {isLoading && (
         <div className="msg ai-msg">
           <div className="ai-msg-header">
-            <div className="ai-msg-avatar">✦</div>
+            <div className="ai-msg-avatar loading">✦</div>
             <span className="ai-msg-name">Pulse</span>
           </div>
           <div className="ai-msg-body">

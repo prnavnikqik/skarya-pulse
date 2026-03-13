@@ -1,13 +1,6 @@
 import { NextResponse } from 'next/server';
-import mongoose from 'mongoose';
 import ChatSession from '@/models/ChatSession';
-
-const MONGODB_URI = process.env.MONGODB_URI!;
-
-async function connectToDatabase() {
-    if (mongoose.connection.readyState >= 1) return;
-    await mongoose.connect(MONGODB_URI);
-}
+import connectToDatabase from '@/lib/mongoose';
 
 export const dynamic = 'force-dynamic';
 

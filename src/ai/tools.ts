@@ -23,7 +23,7 @@ export function getToolsForIntent(
         search_tasks: ['search_tasks', 'search_all_board_tasks', 'get_task_details'],
         board_analytics: ['get_board_health', 'get_team_tasks', 'detect_stuck_tasks', 'predict_deadline_risk', 'get_sprint_summary'],
         document_request: ['get_active_tasks', 'draft_document', 'get_board_health', 'generate_daily_digest', 'get_sprint_summary'],
-        task_management: ['update_task_priority', 'set_task_dates', 'assign_task', 'auto_generate_subtasks', 'create_subtask'],
+        task_management: ['update_task_priority', 'set_task_dates', 'assign_task', 'auto_generate_subtasks', 'create_subtask', 'create_task', 'add_task_comment', 'update_task_status'],
         general_chat: ['get_active_tasks'],
     };
 

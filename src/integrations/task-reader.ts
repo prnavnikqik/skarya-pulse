@@ -427,6 +427,10 @@ export class TaskReader {
      */
     static async getMyOverdueTasks(boardId: string, workspaceId: string, userEmail: string) {
         const response = await skaryaClient.get<any>('/api/boardTask/getBoardTask', { boardId, workspaceId });
+        if (!response.success || !response.data) {
+            console.error('[TaskReader] getMyOverdueTasks failed:', response.message);
+            return [];
+        }
         const allTasks: SkaryaTask[] = Array.isArray(response.data) ? response.data : ((response.data as any)?.tasks || []);
 
         const now = new Date();

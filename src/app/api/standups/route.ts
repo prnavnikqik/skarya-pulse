@@ -26,9 +26,22 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
     try {
-        const data = await req.json();
+        const { yesterday, today, blockers, summary, userEmail, workspaceId, boardId } = await req.json();
+        
+        if (!userEmail || !workspaceId || !boardId) {
+            return NextResponse.json({ success: false, error: 'Missing required fields' }, { status: 400 });
+        }
+
         await connectToDatabase();
-        const newStandup = new Standup(data);
+        const newStandup = new Standup({
+            yesterday,
+            today,
+            blockers,
+            summary,
+            userEmail,
+            workspaceId,
+            boardId
+        });
         await newStandup.save();
         return NextResponse.json({ success: true, standup: newStandup }, { status: 201 });
     } catch (error: any) {
