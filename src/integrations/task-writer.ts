@@ -55,7 +55,7 @@ export class TaskWriter {
     public static async updateTaskStatus(update: TaskUpdate): Promise<WritebackResult> {
         try {
             // Inferred endpoint from HAR reference for updating task: PATCH /api/boardTask/updateBoardTask
-            const response = await skaryaClient.patch(`/api/boardTask/updateBoardTask?id=${update._id}`, {
+            const response = await skaryaClient.put(`/api/boardTask/updateBoardTask?id=${update._id}`, {
                 status: update.status,
                 statusCategory: update.statusCategory,
                 percentageCompletion: update.percentageCompletion
@@ -91,7 +91,7 @@ export class TaskWriter {
 
     public static async updateTaskPriority(taskId: string, taskNumber: string, priority: string): Promise<WritebackResult> {
         try {
-            const response = await skaryaClient.patch(`/api/boardTask/updateBoardTask?id=${taskId}`, {
+            const response = await skaryaClient.put(`/api/boardTask/updateBoardTask?id=${taskId}`, {
                 priority
             });
             if (response.success) {
@@ -109,7 +109,7 @@ export class TaskWriter {
             if (startDate) payload.startDate = startDate;
             if (dueDate) payload.dueDate = dueDate;
 
-            const response = await skaryaClient.patch(`/api/boardTask/updateBoardTask?id=${taskId}`, payload);
+            const response = await skaryaClient.put(`/api/boardTask/updateBoardTask?id=${taskId}`, payload);
             if (response.success) {
                 return { operation: `Update Dates ${taskNumber}`, status: 'success' };
             }
@@ -121,7 +121,7 @@ export class TaskWriter {
 
     public static async assignTask(taskId: string, taskNumber: string, assigneeEmail: string): Promise<WritebackResult> {
         try {
-            const response = await skaryaClient.patch(`/api/boardTask/updateBoardTask?id=${taskId}`, {
+            const response = await skaryaClient.put(`/api/boardTask/updateBoardTask?id=${taskId}`, {
                 assigneePrimary: { email: assigneeEmail, name: 'User' }
             });
             if (response.success) {
@@ -207,7 +207,7 @@ export class TaskWriter {
                 throw new Error("Missing boardId or workspaceId for subtask creation.");
             }
 
-            const response = await skaryaClient.post(`${endpoint}?boardId=${subtask.boardId}&workspaceId=${subtask.workspaceId}`, payload);
+            const response = await skaryaClient.post(`${endpoint}?boardId=${subtask.boardId}&workspaceId=${subtask.workspaceId}&taskId=${subtask.parentTaskId}`, payload);
 
             if (response.success) {
                 return { operation: `Create Subtask: ${subtask.name}`, status: 'success' };

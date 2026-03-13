@@ -1,18 +1,21 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Loader2, AlertCircle, TrendingUp, CheckCircle2, Clock, Users } from 'lucide-react';
-import { fetchBlockerRadar, fetchTeamAnalytics, fetchSprintSummaries } from '@/app/actions/dashboards';
+import { Loader2, AlertCircle, TrendingUp, CheckCircle2, Clock, Users, AlertTriangle, Target, Zap, ArrowUpRight, Shield, BarChart3, Activity } from 'lucide-react';
+import { fetchBlockerRadar, fetchTeamAnalytics, fetchSprintSummaries, fetchSummaries } from '@/app/actions/dashboards';
 
+// ════════════════════════════════════════════
+// BLOCKER RADAR — Risk Intelligence Dashboard
+// ════════════════════════════════════════════
 export function BlockerRadarView({ workspaceId, boardId, fillAndSend }: { workspaceId: string, boardId: string, fillAndSend: (txt: string) => void }) {
   const [loading, setLoading] = useState(true);
-  const [tasks, setTasks] = useState<any[]>([]);
+  const [data, setData] = useState<any>(null);
   const [error, setError] = useState('');
 
   useEffect(() => {
     fetchBlockerRadar(boardId, workspaceId).then(res => {
-      if (res.success) setTasks(res.tasks || []);
-      else setError(res.error);
+      if (res.success) setData(res);
+      else setError(res.error || 'Failed to load');
       setLoading(false);
     });
   }, [boardId, workspaceId]);
@@ -20,139 +23,269 @@ export function BlockerRadarView({ workspaceId, boardId, fillAndSend }: { worksp
   if (loading) return <div className="flex h-64 items-center justify-center text-slate-400"><Loader2 className="animate-spin w-8 h-8" /></div>;
   if (error) return <div className="p-6 text-red-500 bg-red-50 rounded-xl">{error}</div>;
 
+  const summary = data?.summary || {};
+  const tasks = data?.tasks || [];
+  const risks = data?.deadlineRisks || [];
+  const sevColors: any = { critical: { bg: '#fef2f2', border: '#fca5a5', text: '#991b1b', dot: '#ef4444' }, high: { bg: '#fff7ed', border: '#fdba74', text: '#9a3412', dot: '#f97316' }, medium: { bg: '#fefce8', border: '#fde047', text: '#854d0e', dot: '#eab308' }, low: { bg: '#f0fdf4', border: '#86efac', text: '#166534', dot: '#22c55e' } };
+
   return (
-    <div className="pw">
-      <div className="ptl">Blocker Radar</div>
-      <div className="psb text-slate-500">AI-detected from standup sessions</div>
-      <div className="prow">
-        <button 
-          onClick={() => fillAndSend('What are the active blockers here and what are your recommended resolutions for each?')}
-          className="pb dk"
-        >
-          AI Suggest Fixes
-        </button>
-        <button className="pb" onClick={() => fillAndSend('I need to log a new blocker. Please ask me for the details.')}>Log Blocker</button>
+    <div className="pw pb-20">
+      <div className="flex items-start justify-between mb-1">
+        <div>
+          <div className="ptl flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{background: 'linear-gradient(135deg, #ef4444 0%, #f97316 100%)'}}><Shield className="w-[18px] h-[18px] text-white" /></div>
+            Blocker Radar
+          </div>
+          <div className="psb">Real-time risk detection across your board — identify and resolve bottlenecks before they cascade</div>
+        </div>
       </div>
 
-      {tasks.length === 0 ? (
-        <div className="text-center py-16 border-2 border-dashed border-slate-200 rounded-3xl">
-          <CheckCircle2 className="w-12 h-12 text-emerald-400 mx-auto mb-3" />
-          <h3 className="text-lg font-bold text-slate-700">Clear Skies!</h3>
-          <p className="text-slate-500">No stuck tasks currently detected.</p>
+      {/* Risk Summary Cards */}
+      <div style={{display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:12, margin:'20px 0'}}>
+        {[
+          { label: 'Critical', count: summary.criticalCount || 0, color: '#ef4444', bg: '#fef2f2' },
+          { label: 'High Risk', count: summary.highCount || 0, color: '#f97316', bg: '#fff7ed' },
+          { label: 'At-Risk Deadlines', count: summary.totalRisks || 0, color: '#eab308', bg: '#fefce8' },
+          { label: 'Unassigned Work', count: summary.unassignedCount || 0, color: '#6366f1', bg: '#eef2ff' },
+        ].map((c, i) => (
+          <div key={i} style={{background: c.bg, border: `1px solid ${c.color}22`, borderRadius:16, padding:'18px 20px', position:'relative', overflow:'hidden'}}>
+            <div style={{position:'absolute', top:0, left:0, right:0, height:3, background:c.color}} />
+            <div style={{fontSize:28, fontWeight:800, color:c.color, letterSpacing:'-1px'}}>{c.count}</div>
+            <div style={{fontSize:11.5, fontWeight:600, color:c.color, opacity:0.8, marginTop:2}}>{c.label}</div>
+          </div>
+        ))}
+      </div>
+
+      <div className="prow" style={{marginBottom: 16}}>
+        <button className="pb dk" onClick={() => fillAndSend('Analyze all current blockers on this board. For each one, tell me: who is blocked, how long, what the root cause likely is, and your recommended resolution.')}>
+          <Zap className="w-3.5 h-3.5" /> AI Resolution Plan
+        </button>
+        <button className="pb" onClick={() => fillAndSend('Which blockers should I escalate to leadership today? Prioritize by business impact.')}>Escalation Report</button>
+        <button className="pb" onClick={() => fillAndSend('What tasks are at risk of missing their deadline this week? Give me a mitigation plan.')}>Deadline Risk Scan</button>
+      </div>
+
+      {tasks.length === 0 && risks.length === 0 ? (
+        <div className="text-center py-16 border-2 border-dashed border-emerald-200 rounded-3xl" style={{background:'#f0fdf4'}}>
+          <CheckCircle2 className="w-14 h-14 text-emerald-400 mx-auto mb-3" />
+          <h3 className="text-lg font-bold text-emerald-800">All Clear — No Blockers Detected</h3>
+          <p className="text-emerald-600 text-sm mt-1">Your team is moving at full velocity. No stuck tasks found.</p>
         </div>
       ) : (
-        <div className="bklist">
-          {tasks.map((t, idx) => (
-            <div key={t.id || t._id || Math.random()} className={`bkc ${idx % 2 === 0 ? 'crit' : 'med'}`}>
-              <span className={`bsev ${idx % 2 === 0 ? 'c' : 'm'}`}>{idx % 2 === 0 ? 'Critical' : 'Medium'}</span>
-              <div className="bkbd">
-                <div className="bkt">{t.name}</div>
-                <div className="bkd">This task has had no movement since {new Date(t.lastActive).toLocaleDateString()}, flagged as a potential blocker. Current status is {t.status}.</div>
-                <div className="bkf">
-                  <div className="bkwho">
-                    <div className="bkav" style={{background: idx % 2 === 0 ? '#e84393' : '#10b981'}}>
-                      {t.assignee?.substring(0,2).toUpperCase() || 'U'}
+        <div>
+          {/* Stuck Tasks */}
+          {tasks.length > 0 && (
+            <div style={{marginBottom: 24}}>
+              <div style={{fontSize:13, fontWeight:700, color:'#111', marginBottom:12, display:'flex', alignItems:'center', gap:8}}>
+                <AlertTriangle className="w-4 h-4 text-red-500" /> Stuck Tasks — No Movement
+              </div>
+              <div className="bklist">
+                {tasks.map((t: any) => {
+                  const sev = sevColors[t.severity] || sevColors.medium;
+                  return (
+                    <div key={t.id || Math.random()} style={{background:'#fff', border:`1px solid ${sev.border}`, borderLeft:`4px solid ${sev.dot}`, borderRadius:16, padding:'18px 22px', transition:'all .2s'}}>
+                      <div style={{display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:16}}>
+                        <div style={{flex:1}}>
+                          <div style={{display:'flex', alignItems:'center', gap:8, marginBottom:6}}>
+                            <span style={{fontSize:10, fontWeight:700, padding:'2px 10px', borderRadius:20, background:sev.bg, color:sev.text, border:`1px solid ${sev.border}`, textTransform:'uppercase', letterSpacing:'0.5px'}}>{t.severity}</span>
+                            <span style={{fontSize:10, color:'#9ca3af', fontFamily:'monospace'}}>{t.daysStuck}d stuck</span>
+                          </div>
+                          <div style={{fontSize:14, fontWeight:600, color:'#111', marginBottom:4}}>{t.name}</div>
+                          <div style={{fontSize:12, color:'#6b7280', lineHeight:1.6}}>
+                            This task has been stalled for <strong>{t.daysStuck} days</strong> with no progress. Current status: <strong>{t.status}</strong>.
+                          </div>
+                        </div>
+                        <div style={{display:'flex', flexDirection:'column', alignItems:'flex-end', gap:6, flexShrink:0}}>
+                          <div style={{display:'flex', alignItems:'center', gap:6}}>
+                            <div style={{width:22, height:22, borderRadius:'50%', background:sev.dot, display:'flex', alignItems:'center', justifyContent:'center', fontSize:8, fontWeight:700, color:'#fff'}}>
+                              {t.assignee?.substring(0,2).toUpperCase() || 'U'}
+                            </div>
+                            <span style={{fontSize:11.5, color:'#6b7280'}}>{t.assignee || 'Unassigned'}</span>
+                          </div>
+                          <button onClick={() => fillAndSend(`What's blocking "${t.name}" and how can we unblock it? Suggest concrete next steps.`)} style={{fontSize:11, fontWeight:600, color:'#6366f1', background:'#eef2ff', border:'1px solid #c7d2fe', borderRadius:8, padding:'4px 12px', cursor:'pointer'}}>
+                            AI Diagnose →
+                          </button>
+                        </div>
+                      </div>
                     </div>
-                    {t.assignee || 'Unassigned'}
-                  </div>
-                  <span className="bkdate">Stuck</span>
-                  <button className="resbtn" onClick={(e) => { e.currentTarget.textContent = 'Resolved ✓'; e.currentTarget.style.color = '#10b981'; e.currentTarget.style.background = '#ecfdf5'; }}>Mark Resolved</button>
-                </div>
+                  );
+                })}
               </div>
             </div>
-          ))}
+          )}
+
+          {/* Deadline Risks */}
+          {risks.length > 0 && (
+            <div>
+              <div style={{fontSize:13, fontWeight:700, color:'#111', marginBottom:12, display:'flex', alignItems:'center', gap:8}}>
+                <Clock className="w-4 h-4 text-amber-500" /> Deadline Risks — Due Soon, Not On Track
+              </div>
+              <div style={{background:'#fff', border:'1px solid #e5e7eb', borderRadius:16, overflow:'hidden'}}>
+                {risks.map((r: any, i: number) => (
+                  <div key={r.id || i} style={{display:'flex', alignItems:'center', gap:14, padding:'14px 20px', borderBottom: i < risks.length - 1 ? '1px solid #f3f4f6' : 'none'}}>
+                    <div style={{width:8, height:8, borderRadius:'50%', background: (r.completion || 0) < 25 ? '#ef4444' : '#eab308', flexShrink:0}} />
+                    <div style={{flex:1, minWidth:0}}>
+                      <div style={{fontSize:13, fontWeight:600, color:'#111', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap'}}>{r.name}</div>
+                      <div style={{fontSize:11, color:'#9ca3af'}}>{r.assignee || 'Unassigned'}</div>
+                    </div>
+                    <div style={{fontSize:11, fontWeight:600, color:'#ef4444', background:'#fef2f2', padding:'3px 10px', borderRadius:20}}>
+                      Due {r.dueDate ? new Date(r.dueDate).toLocaleDateString('en-US', {month:'short', day:'numeric'}) : 'Soon'}
+                    </div>
+                    <div style={{fontSize:11, color:'#9ca3af'}}>{r.completion || 0}% done</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
   );
 }
 
+// ════════════════════════════════════════════
+// TEAM ANALYTICS — Workload & Performance
+// ════════════════════════════════════════════
 export function TeamAnalyticsView({ workspaceId, boardId, fillAndSend }: { workspaceId: string, boardId: string, fillAndSend: (txt: string) => void }) {
   const [loading, setLoading] = useState(true);
-  const [health, setHealth] = useState<any>(null);
-  const [members, setMembers] = useState<any[]>([]);
-  const [showTeam, setShowTeam] = useState(false);
+  const [data, setData] = useState<any>(null);
 
   useEffect(() => {
     fetchTeamAnalytics(boardId, workspaceId).then(res => {
-      if (res.success) {
-        setHealth(res.health);
-        if (res.members) setMembers(res.members);
-      }
+      if (res.success) setData(res);
       setLoading(false);
     });
   }, [boardId, workspaceId]);
 
   if (loading) return <div className="flex h-64 items-center justify-center text-slate-400"><Loader2 className="animate-spin w-8 h-8" /></div>;
 
+  const health = data?.health || {};
+  const members = data?.members || [];
+  const metrics = data?.metrics || {};
+  const statusDist = data?.distributions?.status || {};
+  const priorityDist = data?.distributions?.priority || {};
+  const risks = data?.risks || [];
+
+  const completionPct = metrics.completionRate?.toFixed(0) || 0;
+  const totalStatus = Object.values(statusDist).reduce((a: any, b: any) => a + b, 0) as number;
+
+  // Color map for status bars
+  const statusColors: any = { 'Done': '#10b981', 'Completed': '#10b981', 'In Progress': '#3b82f6', 'To Do': '#9ca3af', 'Review': '#8b5cf6', 'Testing': '#f59e0b' };
+
   return (
     <div className="pw pb-20">
-      <div className="flex items-start justify-between">
+      <div className="flex items-start justify-between mb-1">
         <div>
-          <div className="ptl">Team Analytics</div>
-          <div className="psb">Standup health & sprint performance</div>
+          <div className="ptl flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{background:'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)'}}><BarChart3 className="w-[18px] h-[18px] text-white" /></div>
+            Team Analytics
+          </div>
+          <div className="psb">Team workload distribution, velocity metrics, and performance insights — powered by live board data</div>
         </div>
-        <button 
-          className="px-4 py-2 bg-white border border-slate-200 text-sm font-bold text-slate-700 rounded-xl hover:bg-slate-50 transition-colors shadow-sm flex items-center gap-2"
-          onClick={() => setShowTeam(!showTeam)}
-        >
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          {showTeam ? 'Hide Team' : 'View Team'}
-        </button>
       </div>
 
-      {showTeam && (
-        <div className="mt-6 mb-8 bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
-          <div className="bg-slate-50 px-5 py-3 border-b border-slate-200">
-            <h3 className="text-sm font-bold text-slate-800">Team Members ({members.length})</h3>
+      {/* KPI Cards */}
+      <div style={{display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:12, margin:'20px 0'}}>
+        {[
+          { label: 'Sprint Velocity', value: `${completionPct}%`, sub: `${metrics.completed || 0} of ${metrics.total || 0} tasks`, color: Number(completionPct) >= 70 ? '#10b981' : '#f59e0b' },
+          { label: 'In Progress', value: metrics.inProgress || 0, sub: 'Active right now', color: '#3b82f6' },
+          { label: 'Overdue', value: health.overdue?.length || 0, sub: 'Need attention', color: (health.overdue?.length || 0) > 0 ? '#ef4444' : '#10b981' },
+          { label: 'Team Size', value: members.length, sub: 'Active contributors', color: '#8b5cf6' },
+        ].map((c, i) => (
+          <div key={i} style={{background:'#fff', border:'1px solid #e5e7eb', borderRadius:16, padding:'20px', position:'relative'}}>
+            <div style={{fontSize:11.5, fontWeight:500, color:'#9ca3af', marginBottom:6}}>{c.label}</div>
+            <div style={{fontSize:28, fontWeight:800, color:c.color, letterSpacing:'-1px'}}>{c.value}</div>
+            <div style={{fontSize:11, color:'#9ca3af', marginTop:2}}>{c.sub}</div>
           </div>
-          <div className="p-2">
-            {members.length > 0 ? members.map(member => (
-              <div key={member.id} className="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 transition-colors">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold" style={{ backgroundColor: member.bg }}>
-                    {member.avatar}
-                  </div>
-                  <div>
-                    <div className="font-bold text-sm text-slate-800">{member.name}</div>
-                    <div className="text-xs text-slate-500 font-medium">{member.role}</div>
-                  </div>
+        ))}
+      </div>
+
+      <div className="prow" style={{marginBottom:20}}>
+        <button className="pb dk" onClick={() => fillAndSend('Give me a comprehensive team performance analysis. Who is overloaded? Who has capacity? What tasks should be redistributed?')}>
+          <Users className="w-3.5 h-3.5" /> Workload Analysis
+        </button>
+        <button className="pb" onClick={() => fillAndSend('Based on current velocity, will we meet our sprint commitments? What are the risks?')}>Sprint Forecast</button>
+        <button className="pb" onClick={() => fillAndSend('Identify the top 3 bottlenecks slowing down the team and suggest fixes.')}>Find Bottlenecks</button>
+      </div>
+
+      {/* Status Distribution */}
+      <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:16, marginBottom:20}}>
+        <div style={{background:'#fff', border:'1px solid #e5e7eb', borderRadius:18, padding:22}}>
+          <div style={{fontSize:13, fontWeight:700, color:'#111', marginBottom:16}}>Task Status Distribution</div>
+          <div style={{display:'flex', flexDirection:'column', gap:10}}>
+            {Object.entries(statusDist).map(([status, count]: any) => (
+              <div key={status}>
+                <div style={{display:'flex', justifyContent:'space-between', fontSize:12, marginBottom:4}}>
+                  <span style={{color:'#374151', fontWeight:500}}>{status}</span>
+                  <span style={{color:'#9ca3af', fontWeight:600}}>{count}</span>
                 </div>
-                <div className="flex items-center gap-2 text-xs font-bold text-slate-500">
-                  <span className={`w-2 h-2 rounded-full ${member.status === 'Online' ? 'bg-emerald-500' : 'bg-slate-300'}`}></span>
-                  {member.status}
+                <div style={{height:6, background:'#f3f4f6', borderRadius:3, overflow:'hidden'}}>
+                  <div style={{height:'100%', width:`${totalStatus > 0 ? (count/totalStatus)*100 : 0}%`, background: statusColors[status] || '#6366f1', borderRadius:3, transition:'width 0.5s ease'}} />
                 </div>
               </div>
-            )) : <div className="p-4 text-center text-sm font-medium text-slate-500">No active team members detected on this board yet.</div>}
+            ))}
           </div>
         </div>
-      )}
-      
-      <div className="statgrid" style={{ marginTop: '20px' }}>
-        <div className="statc"><div className="statv">{health?.activeTasks || 0}</div><div className="statl">Active Tasks</div><div className="statd up">Stable</div></div>
-        <div className="statc"><div className="statv">{health?.overdue?.length || 0}</div><div className="statl">Overdue Tasks</div><div className="statd dn">Action needed</div></div>
-        <div className="statc"><div className="statv">{health?.dueSoon?.length || 0}</div><div className="statl">Due Soon</div><div className="statd up">On Track</div></div>
-        <div className="statc"><div className="statv">100<span style={{fontSize:'13px',fontWeight:500,color:'var(--mu)'}}>%</span></div><div className="statl">Participation today</div><div className="statd up">Great 🎉</div></div>
-      </div>
-      
-      <div className="chbox">
-        <div className="chtl">AI Insights</div>
-        <div className="p-4 bg-white/50 text-slate-600 text-sm">
-           Based on current velocity, {health?.activeTasks || 0} tasks are active. 
-           {health?.overdue?.length > 0 ? ` WARNING: ${health.overdue.length} tasks are overdue. Recommend AI review.` : ' No overdue tasks detected.'}
+
+        <div style={{background:'#fff', border:'1px solid #e5e7eb', borderRadius:18, padding:22}}>
+          <div style={{fontSize:13, fontWeight:700, color:'#111', marginBottom:16}}>Priority Breakdown</div>
+          <div style={{display:'flex', flexDirection:'column', gap:10}}>
+            {Object.entries(priorityDist).map(([priority, count]: any) => {
+              const pColors: any = { Critical: '#ef4444', High: '#f97316', Medium: '#eab308', Low: '#10b981', None: '#9ca3af' };
+              return (
+                <div key={priority}>
+                  <div style={{display:'flex', justifyContent:'space-between', fontSize:12, marginBottom:4}}>
+                    <span style={{display:'flex', alignItems:'center', gap:6}}>
+                      <span style={{width:8, height:8, borderRadius:'50%', background:pColors[priority] || '#9ca3af'}} />
+                      <span style={{color:'#374151', fontWeight:500}}>{priority}</span>
+                    </span>
+                    <span style={{color:'#9ca3af', fontWeight:600}}>{count}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
-        <button className="pb" style={{ marginTop: 12 }} onClick={() => fillAndSend('Give me a team performance analysis with actionable insights.')}>AI Deep Dive →</button>
       </div>
 
-      {health?.overdue?.length > 0 && (
-        <div className="twocol" style={{ marginTop: '24px' }}>
-          <div className="box" style={{ gridColumn: '1 / -1' }}>
-            <div className="boxt">Overdue Tasks</div>
-            {health.overdue.map((t: any) => (
-              <div key={t.id || t._id || Math.random()} className="vrow">
-                <div className="vav" style={{background:'#f43f5e'}}>{t.assignee?.substring(0,2).toUpperCase() || 'U'}</div>
-                <span className="vname">{t.name}</span>
-                <span className="vpct text-orange-600 font-medium">Overdue</span>
+      {/* Team Workload Table */}
+      {members.length > 0 && (
+        <div style={{background:'#fff', border:'1px solid #e5e7eb', borderRadius:18, overflow:'hidden'}}>
+          <div style={{padding:'18px 22px', borderBottom:'1px solid #f3f4f6', display:'flex', justifyContent:'space-between', alignItems:'center'}}>
+            <div style={{fontSize:13, fontWeight:700, color:'#111'}}>Team Workload</div>
+            <div style={{fontSize:11, color:'#9ca3af'}}>{members.length} contributors</div>
+          </div>
+          <div>
+            {members.map((m: any, i: number) => (
+              <div key={m.id || i} style={{display:'flex', alignItems:'center', gap:14, padding:'14px 22px', borderBottom: i < members.length - 1 ? '1px solid #f9fafb' : 'none', transition:'background 0.13s'}} className="hover:bg-slate-50">
+                <div style={{width:36, height:36, borderRadius:10, background:m.bg || '#6366f1', display:'flex', alignItems:'center', justifyContent:'center', color:'#fff', fontWeight:700, fontSize:12, flexShrink:0}}>{m.avatar}</div>
+                <div style={{flex:1, minWidth:0}}>
+                  <div style={{fontSize:13, fontWeight:600, color:'#111'}}>{m.name}</div>
+                  <div style={{fontSize:11, color:'#9ca3af'}}>{m.role} · {m.email}</div>
+                </div>
+                <div style={{display:'flex', gap:20, alignItems:'center', flexShrink:0}}>
+                  <div style={{textAlign:'center'}}>
+                    <div style={{fontSize:16, fontWeight:700, color:'#111'}}>{m.totalTasks}</div>
+                    <div style={{fontSize:10, color:'#9ca3af'}}>Total</div>
+                  </div>
+                  <div style={{textAlign:'center'}}>
+                    <div style={{fontSize:16, fontWeight:700, color:'#10b981'}}>{m.completed}</div>
+                    <div style={{fontSize:10, color:'#9ca3af'}}>Done</div>
+                  </div>
+                  <div style={{textAlign:'center'}}>
+                    <div style={{fontSize:16, fontWeight:700, color:'#3b82f6'}}>{m.active}</div>
+                    <div style={{fontSize:10, color:'#9ca3af'}}>Active</div>
+                  </div>
+                  <div style={{textAlign:'center'}}>
+                    <div style={{fontSize:16, fontWeight:700, color: m.overdue > 0 ? '#ef4444' : '#10b981'}}>{m.overdue}</div>
+                    <div style={{fontSize:10, color:'#9ca3af'}}>Overdue</div>
+                  </div>
+                  <div style={{width:60}}>
+                    <div style={{height:5, background:'#f3f4f6', borderRadius:3, overflow:'hidden'}}>
+                      <div style={{height:'100%', width:`${m.completionRate}%`, background: m.completionRate >= 70 ? '#10b981' : m.completionRate >= 40 ? '#eab308' : '#ef4444', borderRadius:3}} />
+                    </div>
+                    <div style={{fontSize:10, color:'#9ca3af', textAlign:'right', marginTop:2}}>{m.completionRate}%</div>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
@@ -162,135 +295,260 @@ export function TeamAnalyticsView({ workspaceId, boardId, fillAndSend }: { works
   );
 }
 
+// ════════════════════════════════════════════
+// SPRINT REPORTS — Sprint Intelligence
+// ════════════════════════════════════════════
 export function SprintReportsView({ workspaceId, boardId, fillAndSend }: { workspaceId: string, boardId: string, fillAndSend: (txt: string) => void }) {
   const [loading, setLoading] = useState(true);
-  const [metrics, setMetrics] = useState<any>(null);
+  const [data, setData] = useState<any>(null);
 
   useEffect(() => {
     fetchSprintSummaries(boardId, workspaceId).then(res => {
-      if (res.success) setMetrics(res.metrics);
+      if (res.success) setData(res);
       setLoading(false);
     });
   }, [boardId, workspaceId]);
 
   if (loading) return <div className="flex h-64 items-center justify-center text-slate-400"><Loader2 className="animate-spin w-8 h-8" /></div>;
 
+  const metrics = data?.metrics || {};
+  const health = data?.health || {};
+  const risks = data?.risks || [];
+  const recentlyCompleted = data?.recentlyCompleted || [];
+  const highPriority = data?.highPriorityOpen || [];
+  const completionPct = metrics.completionRate?.toFixed(1) || 0;
+
   return (
-    <div className="pw">
-      <div className="ptl">Sprint Reports</div>
-      <div className="psb">AI-generated digests for every sprint</div>
-      <div className="prow">
-        <button 
-          className="pb dk" 
-          onClick={() => fillAndSend('Generate a mid-sprint report for Sprint 23: velocity, completed tasks, blockers, risks, and key highlights.')}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Generate Report
+    <div className="pw pb-20">
+      <div className="flex items-start justify-between mb-1">
+        <div>
+          <div className="ptl flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{background:'linear-gradient(135deg, #6366f1 0%, #a78bfa 100%)'}}><Activity className="w-[18px] h-[18px] text-white" /></div>
+            Sprint Report
+          </div>
+          <div className="psb">Live sprint health snapshot — track velocity, identify risks, and generate stakeholder-ready reports</div>
+        </div>
+      </div>
+
+      {/* Sprint Health Hero */}
+      <div style={{background:'linear-gradient(135deg, #312e81 0%, #4338ca 50%, #6366f1 100%)', borderRadius:20, padding:'28px 30px', margin:'20px 0', color:'#fff', position:'relative', overflow:'hidden'}}>
+        <div style={{position:'absolute', top:0, right:0, width:200, height:200, background:'radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%)', borderRadius:'50%'}} />
+        <div style={{fontSize:12, fontWeight:600, opacity:0.7, textTransform:'uppercase', letterSpacing:'1px', marginBottom:16}}>Current Sprint · Live</div>
+        <div style={{display:'grid', gridTemplateColumns:'repeat(5,1fr)', gap:20}}>
+          {[
+            { label: 'Total Tasks', value: metrics.total || 0 },
+            { label: 'Completed', value: metrics.completed || 0 },
+            { label: 'In Progress', value: metrics.inProgress || 0 },
+            { label: 'Not Started', value: metrics.notStarted || 0 },
+            { label: 'Velocity', value: `${completionPct}%` },
+          ].map((m, i) => (
+            <div key={i}>
+              <div style={{fontSize:28, fontWeight:800, letterSpacing:'-1px'}}>{m.value}</div>
+              <div style={{fontSize:11, opacity:0.6, marginTop:2}}>{m.label}</div>
+            </div>
+          ))}
+        </div>
+        {/* Progress bar */}
+        <div style={{marginTop:20, height:6, background:'rgba(255,255,255,0.15)', borderRadius:3, overflow:'hidden'}}>
+          <div style={{height:'100%', width:`${completionPct}%`, background:'linear-gradient(90deg, #34d399, #10b981)', borderRadius:3, transition:'width 0.8s ease'}} />
+        </div>
+      </div>
+
+      <div className="prow" style={{marginBottom:20}}>
+        <button className="pb dk" onClick={() => fillAndSend('Generate a comprehensive sprint report with: velocity analysis, completed items, remaining work, blockers, risks, and recommendations for the next sprint.')}>
+          <Zap className="w-3.5 h-3.5" /> Generate Full Report
         </button>
+        <button className="pb" onClick={() => fillAndSend('Create an executive summary of this sprint suitable for a leadership review meeting. Keep it concise with metrics and key decisions needed.')}>Executive Summary</button>
+        <button className="pb" onClick={() => fillAndSend('Compare our current sprint velocity with what would be needed to complete all remaining work on time. Are we on track?')}>Forecast</button>
       </div>
-      <div className="replist">
-        <div className="repc">
-          <div className="repico" style={{background:'#eef0ff', color:'var(--a)'}}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
-          <div><div className="rept">Sprint 23 — In Progress</div><div className="repm">Mon–Sun · {metrics?.total || 0} tasks · {metrics?.completionRate?.toFixed(1) || 0}% velocity</div></div>
-          <div className="repacts">
-            <button className="ract" onClick={() => fillAndSend('Generate a mid-sprint AI report for Sprint 23 with velocity analysis, completed items, and risk assessment.')}>Generate</button>
-            <button className="ract" onClick={() => alert('Exported!')}>Export</button>
+
+      <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:16}}>
+        {/* Recently Completed */}
+        <div style={{background:'#fff', border:'1px solid #e5e7eb', borderRadius:18, overflow:'hidden'}}>
+          <div style={{padding:'16px 20px', borderBottom:'1px solid #f3f4f6', display:'flex', alignItems:'center', gap:8}}>
+            <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+            <span style={{fontSize:13, fontWeight:700, color:'#111'}}>Recently Completed</span>
+            <span style={{fontSize:11, color:'#9ca3af', marginLeft:'auto'}}>{recentlyCompleted.length} items</span>
           </div>
+          {recentlyCompleted.length > 0 ? recentlyCompleted.map((t: any, i: number) => (
+            <div key={t.id || i} style={{display:'flex', alignItems:'center', gap:10, padding:'12px 20px', borderBottom: i < recentlyCompleted.length-1 ? '1px solid #f9fafb' : 'none'}}>
+              <div style={{width:6, height:6, borderRadius:'50%', background:'#10b981', flexShrink:0}} />
+              <span style={{fontSize:12.5, color:'#374151', flex:1, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap'}}>{t.name}</span>
+              <span style={{fontSize:11, color:'#9ca3af', flexShrink:0}}>{t.assignee}</span>
+            </div>
+          )) : <div style={{padding:'24px 20px', textAlign:'center', color:'#9ca3af', fontSize:12}}>No recently completed tasks</div>}
         </div>
-        <div className="repc">
-          <div className="repico" style={{background:'#d1fae5', color:'#065f46'}}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12"/></svg></div>
-          <div><div className="rept">Sprint 22 — Complete</div><div className="repm">{metrics?.completed || 0} completed · 94% velocity · {metrics?.inProgress || 0} carry-overs</div></div>
-          <div className="repacts">
-            <button className="ract" onClick={() => fillAndSend('Summarise Sprint 22 outcomes, velocity trends, and lessons learned.')}>View</button>
-            <button className="ract" onClick={() => alert('Exported!')}>Export</button>
+
+        {/* High Priority Open */}
+        <div style={{background:'#fff', border:'1px solid #e5e7eb', borderRadius:18, overflow:'hidden'}}>
+          <div style={{padding:'16px 20px', borderBottom:'1px solid #f3f4f6', display:'flex', alignItems:'center', gap:8}}>
+            <AlertTriangle className="w-4 h-4 text-amber-500" />
+            <span style={{fontSize:13, fontWeight:700, color:'#111'}}>High Priority — Still Open</span>
+            <span style={{fontSize:11, color:'#9ca3af', marginLeft:'auto'}}>{highPriority.length} items</span>
           </div>
-        </div>
-        <div className="repc">
-          <div className="repico" style={{background:'#d1fae5', color:'#065f46'}}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12"/></svg></div>
-          <div><div className="rept">Sprint 21 — Complete</div><div className="repm">88% velocity · 4 carry-overs</div></div>
-          <div className="repacts">
-            <button className="ract" onClick={() => fillAndSend('Compare Sprint 21 vs Sprint 22 — what improved and what regressed?')}>View</button>
-            <button className="ract" onClick={() => alert('Exported!')}>Export</button>
-          </div>
+          {highPriority.length > 0 ? highPriority.map((t: any, i: number) => (
+            <div key={t.id || i} style={{display:'flex', alignItems:'center', gap:10, padding:'12px 20px', borderBottom: i < highPriority.length-1 ? '1px solid #f9fafb' : 'none'}}>
+              <div style={{width:6, height:6, borderRadius:'50%', background: t.priority === 'Critical' ? '#ef4444' : '#f97316', flexShrink:0}} />
+              <span style={{fontSize:12.5, color:'#374151', flex:1, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap'}}>{t.name}</span>
+              <span style={{fontSize:10, fontWeight:600, color: t.priority === 'Critical' ? '#ef4444' : '#f97316', background: t.priority === 'Critical' ? '#fef2f2' : '#fff7ed', padding:'2px 8px', borderRadius:20}}>{t.priority}</span>
+            </div>
+          )) : <div style={{padding:'24px 20px', textAlign:'center', color:'#9ca3af', fontSize:12}}>No high priority open items ✓</div>}
         </div>
       </div>
+
+      {/* Risks Section */}
+      {risks.length > 0 && (
+        <div style={{marginTop:20, background:'#fff', border:'1px solid #fde68a', borderRadius:18, padding:22}}>
+          <div style={{fontSize:13, fontWeight:700, color:'#92400e', marginBottom:14, display:'flex', alignItems:'center', gap:8}}>
+            <AlertCircle className="w-4 h-4" /> Sprint Risks — {risks.length} tasks at risk of missing deadline
+          </div>
+          {risks.slice(0, 5).map((r: any, i: number) => (
+            <div key={r.id || i} style={{display:'flex', alignItems:'center', gap:12, padding:'10px 0', borderBottom: i < Math.min(risks.length, 5) - 1 ? '1px solid #fef3c7' : 'none'}}>
+              <span style={{fontSize:12.5, color:'#374151', flex:1}}>{r.name}</span>
+              <span style={{fontSize:11, color:'#92400e'}}>Due {r.dueDate ? new Date(r.dueDate).toLocaleDateString('en-US', {month:'short', day:'numeric'}) : '—'}</span>
+              <span style={{fontSize:11, color:'#9ca3af'}}>{r.completion || 0}%</span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
 
+// ════════════════════════════════════════════
+// SUMMARIES — Daily Team Pulse
+// ════════════════════════════════════════════
 export function SummariesView({ workspaceId, boardId, fillAndSend }: { workspaceId: string, boardId: string, fillAndSend: (txt: string) => void }) {
   const [loading, setLoading] = useState(true);
-  const [summaries, setSummaries] = useState<any[]>([]);
+  const [data, setData] = useState<any>(null);
 
   useEffect(() => {
-    // In a future phase, this will fetch from the new TeamStandup model.
-    // For now, simulating the fetch.
-    setSummaries([
-      {
-        id: 'mock-1',
-        title: 'Daily Standup — ' + new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }),
-        metrics: '6 members · 14 min · 3 blockers',
-        tags: [{ label: 'Standup', colorClass: 'b' }, { label: '3 Blockers', colorClass: 'r' }],
-        content: "Aarav: SSO ✅, rate limiting today — needs load test data from Lena. Sofia: blocked on mobile nav (Figma handoff from Diana due today). Marcus: DB pool at 94% + DBA approval pending. Diana: tokens 80%, spacing audit done (14 issues in Notion). James: research complete — time-range filter to front. Lena: CloudWatch access pending.",
-        events: [
-          { text: "@pranvnikqik gave an update - roadblock detected", class: "am" },
-          { text: "@sarah just posted an afternoon update", class: "g" }
-        ]
-      }
-    ]);
-    setLoading(false);
+    fetchSummaries(boardId, workspaceId).then(res => {
+      if (res.success) setData(res);
+      setLoading(false);
+    });
   }, [boardId, workspaceId]);
 
   if (loading) return <div className="flex h-64 items-center justify-center text-slate-400"><Loader2 className="animate-spin w-8 h-8" /></div>;
 
+  const snapshot = data?.snapshot || {};
+  const memberUpdates = data?.memberUpdates || [];
+  const blockerCount = data?.blockerCount || 0;
+  const stuckTasks = data?.stuckTasks || [];
+
   return (
-    <div className="pw">
-      <div className="ptl">Summaries</div>
-      <div className="psb">Team-wide aggregated updates</div>
-      <div className="prow">
-        <button className="pb dk" onClick={() => fillAndSend('Generate a full summary for today\'s standup with all updates, blockers, and action items.')}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Generate Summary
-        </button>
-      </div>
-      <div className="suml">
-        {summaries.map((s, i) => (
-          <div key={s.id} className="sumc">
-            <div className="sumc-h">
-              <div className="sumc-i" style={{background:'#eff6ff',color:'#3b82f6'}}>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-              </div>
-              <div><div className="sumc-t">{s.title}</div><div className="sumc-m">{s.metrics}</div></div>
-              <div className="sumc-tags">
-                {s.tags.map((t: any, j: number) => <span key={j} className={`tag ${t.colorClass}`}>{t.label}</span>)}
-              </div>
-            </div>
-            
-            {i === 0 && s.events && (
-              <div className="mb-4 mt-1 flex flex-col gap-2">
-                {s.events.map((e: any, j: number) => (
-                   <div key={j} className={`tag ${e.class} text-xs py-1.5 px-3 mb-1 w-fit rounded-lg`}>{e.text}</div>
-                ))}
-              </div>
-            )}
-            
-            <div className="sumc-b" dangerouslySetInnerHTML={{ __html: s.content }} />
-            <div className="sumc-f">
-              <button className="sa p" onClick={() => alert('Opening aggregate chat viewer is coming soon')}>Open Chat</button>
-              <button className="sa" onClick={() => alert('Copied ✓')}>Copy</button>
-              <button className="sa" onClick={() => alert('Sent to Slack ✓')}>→ Slack</button>
-              <button className="sa" onClick={() => alert('Saved to Notion ✓')}>→ Notion</button>
-            </div>
+    <div className="pw pb-20">
+      <div className="flex items-start justify-between mb-1">
+        <div>
+          <div className="ptl flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{background:'linear-gradient(135deg, #10b981 0%, #059669 100%)'}}><Target className="w-[18px] h-[18px] text-white" /></div>
+            Daily Pulse Summary
           </div>
-        ))}
+          <div className="psb">{snapshot.date || 'Today'} — Team-wide activity snapshot and individual progress</div>
+        </div>
       </div>
+
+      {/* Daily Pulse Banner */}
+      <div style={{background:'linear-gradient(135deg, #065f46 0%, #047857 50%, #10b981 100%)', borderRadius:20, padding:'24px 28px', margin:'20px 0', color:'#fff', position:'relative', overflow:'hidden'}}>
+        <div style={{position:'absolute', top:-30, right:-30, width:150, height:150, background:'radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 70%)', borderRadius:'50%'}} />
+        <div style={{fontSize:12, fontWeight:600, opacity:0.7, textTransform:'uppercase', letterSpacing:'1px', marginBottom:14}}>Today's Pulse</div>
+        <div style={{display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:20}}>
+          {[
+            { label: 'Active Tasks', value: snapshot.totalActive || 0 },
+            { label: 'Completion', value: `${(snapshot.completionRate || 0).toFixed(0)}%` },
+            { label: 'Overdue', value: snapshot.overdueCount || 0 },
+            { label: 'Due Soon', value: snapshot.dueSoonCount || 0 },
+          ].map((m, i) => (
+            <div key={i}>
+              <div style={{fontSize:26, fontWeight:800, letterSpacing:'-1px'}}>{m.value}</div>
+              <div style={{fontSize:11, opacity:0.6, marginTop:2}}>{m.label}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="prow" style={{marginBottom:20}}>
+        <button className="pb dk" onClick={() => fillAndSend('Generate a comprehensive daily summary: who\'s working on what, blockers, completed items, and action items for follow-up.')}>
+          <Zap className="w-3.5 h-3.5" /> Generate AI Summary
+        </button>
+        <button className="pb" onClick={() => fillAndSend('What are the top 3 things the team should focus on today based on priorities and deadlines?')}>Today's Focus</button>
+        <button className="pb" onClick={() => fillAndSend('Draft a daily standup digest I can share on Slack with the team.')}>Slack Digest</button>
+      </div>
+
+      {/* Per-Member Activity */}
+      {memberUpdates.length > 0 && (
+        <div style={{background:'#fff', border:'1px solid #e5e7eb', borderRadius:18, overflow:'hidden', marginBottom:20}}>
+          <div style={{padding:'18px 22px', borderBottom:'1px solid #f3f4f6'}}>
+            <div style={{fontSize:13, fontWeight:700, color:'#111'}}>Team Member Activity</div>
+            <div style={{fontSize:11, color:'#9ca3af', marginTop:2}}>{memberUpdates.length} contributors on this board</div>
+          </div>
+          {memberUpdates.map((m: any, i: number) => (
+            <div key={m.email || i} style={{padding:'16px 22px', borderBottom: i < memberUpdates.length-1 ? '1px solid #f9fafb' : 'none'}}>
+              <div style={{display:'flex', alignItems:'center', gap:14}}>
+                <div style={{width:38, height:38, borderRadius:10, background: m.bg || '#6366f1', display:'flex', alignItems:'center', justifyContent:'center', color:'#fff', fontWeight:700, fontSize:13, flexShrink:0}}>{m.avatar}</div>
+                <div style={{flex:1, minWidth:0}}>
+                  <div style={{display:'flex', alignItems:'center', gap:8}}>
+                    <span style={{fontSize:13, fontWeight:600, color:'#111'}}>{m.name}</span>
+                    {m.blocked > 0 && <span style={{fontSize:10, fontWeight:600, color:'#ef4444', background:'#fef2f2', padding:'1px 8px', borderRadius:20}}>⚠ {m.blocked} blocked</span>}
+                  </div>
+                  <div style={{fontSize:11, color:'#9ca3af', marginTop:2}}>
+                    {m.completed} done · {m.inProgress} in progress · {m.totalTasks} total
+                  </div>
+                </div>
+                <div style={{display:'flex', gap:6, flexShrink:0}}>
+                  <div style={{width:48, textAlign:'center'}}>
+                    <div style={{fontSize:16, fontWeight:700, color:'#10b981'}}>{m.completed}</div>
+                    <div style={{fontSize:9, color:'#9ca3af'}}>Done</div>
+                  </div>
+                  <div style={{width:48, textAlign:'center'}}>
+                    <div style={{fontSize:16, fontWeight:700, color:'#3b82f6'}}>{m.inProgress}</div>
+                    <div style={{fontSize:9, color:'#9ca3af'}}>WIP</div>
+                  </div>
+                </div>
+              </div>
+              {m.topTasks && m.topTasks.length > 0 && (
+                <div style={{marginTop:10, marginLeft:52, display:'flex', flexDirection:'column', gap:4}}>
+                  {m.topTasks.map((task: string, j: number) => (
+                    <div key={j} style={{fontSize:11.5, color:'#6b7280', display:'flex', alignItems:'center', gap:6}}>
+                      <div style={{width:5, height:5, borderRadius:'50%', background:'#3b82f6', flexShrink:0}} />
+                      {task}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Blockers Alert */}
+      {blockerCount > 0 && (
+        <div style={{background:'#fef2f2', border:'1px solid #fecaca', borderRadius:18, padding:22}}>
+          <div style={{fontSize:13, fontWeight:700, color:'#991b1b', marginBottom:12, display:'flex', alignItems:'center', gap:8}}>
+            <AlertTriangle className="w-4 h-4" /> {blockerCount} Potential Blockers Detected
+          </div>
+          {stuckTasks.slice(0, 4).map((t: any, i: number) => (
+            <div key={t.id || i} style={{display:'flex', alignItems:'center', gap:10, padding:'8px 0', borderBottom: i < Math.min(stuckTasks.length, 4) - 1 ? '1px solid #fee2e2' : 'none'}}>
+              <div style={{width:6, height:6, borderRadius:'50%', background:'#ef4444', flexShrink:0}} />
+              <span style={{fontSize:12, color:'#991b1b', flex:1}}>{t.name}</span>
+              <span style={{fontSize:11, color:'#b91c1c'}}>{t.assignee || 'Unassigned'}</span>
+            </div>
+          ))}
+          <button className="pb" style={{marginTop:12}} onClick={() => fillAndSend('Analyze these blockers and suggest resolutions for each one.')}>AI Resolve →</button>
+        </div>
+      )}
     </div>
   );
 }
 
+// ════════════════════════════════════════════
+// SETTINGS (unchanged)
+// ════════════════════════════════════════════
 export function SettingsView() {
   return (
     <div className="pw pb-20">
       <div className="ptl">Settings</div>
       <div className="psb mb-6">Standup format & mediator flow configuration</div>
-      
       <div className="setblk">
         <div className="settl text-[var(--a2)] font-bold mb-3">Team Definition & Scope</div>
         <div className="setrow cursor-pointer" onClick={(e) => e.currentTarget.querySelector('.tog')?.classList.toggle('on')}>
@@ -306,7 +564,6 @@ export function SettingsView() {
           <div className="tog on"></div>
         </div>
       </div>
-
       <div className="setblk mt-8">
         <div className="settl text-[var(--a2)] font-bold mb-3">Standup Approach</div>
         <div className="setrow cursor-pointer" onClick={(e) => e.currentTarget.querySelector('.tog')?.classList.toggle('on')}>
@@ -318,7 +575,6 @@ export function SettingsView() {
           <div className="tog"></div>
         </div>
       </div>
-      
       <div className="setblk mt-8">
         <div className="settl text-[var(--a2)] font-bold mb-3">AI Behaviour</div>
         <div className="setrow cursor-pointer" onClick={(e) => e.currentTarget.querySelector('.tog')?.classList.toggle('on')}>

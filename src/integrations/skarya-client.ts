@@ -36,6 +36,7 @@ class SkaryaClient {
             }
 
             config.headers['Content-Type'] = 'application/json';
+            config.headers['Accept'] = 'application/json';
             
             if (cookieToUse) {
                 config.headers['Cookie'] = cookieToUse;
