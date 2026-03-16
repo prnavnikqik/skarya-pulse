@@ -14,7 +14,7 @@ export const FallbackView = ({ title, desc }: { title: string, desc: string }) =
   </div>
 );
 
-export const HomeView = ({ fillAndSend, user, startStandup }: any) => (
+export const HomeView = ({ fillAndSend, user, startStandup, isStandupDoneToday }: any) => (
   <div className="hempty" id="hempty">
     <div className="orb-w"><div className="orb-g"></div><div className="orb"></div></div>
     <p className="gr">Good morning, {user?.userName?.split(' ')[0] || 'there'} 👋</p>
@@ -23,7 +23,7 @@ export const HomeView = ({ fillAndSend, user, startStandup }: any) => (
     <div className="cgrid">
       <div className="qc" onClick={() => startStandup()}>
         <div className="qi qi-b"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
-        <div className="ql">Run Today's Standup</div>
+        <div className="ql">{isStandupDoneToday ? "View Today's Standup" : "Run Today's Standup"}</div>
       </div>
       <div className="qc" onClick={() => fillAndSend('Summarise today\'s session and extract all action items.')}>
         <div className="qi qi-pu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
@@ -78,7 +78,7 @@ export const StandupHistoryLayout = ({ startStandup, pastStandups, loadChat }: a
             <CheckCircle2 className="w-6 h-6" />
           </div>
           <div>
-            <div className="font-bold text-emerald-900 text-lg">Today's standup is complete!</div>
+            <div className="font-bold text-emerald-900 text-lg">Today's standup session is active</div>
             <div className="text-emerald-700 text-sm mt-1">Great job logging your updates for the team.</div>
           </div>
         </div>
@@ -86,7 +86,7 @@ export const StandupHistoryLayout = ({ startStandup, pastStandups, loadChat }: a
           className="px-6 py-2.5 bg-white border border-emerald-200 text-emerald-700 font-bold rounded-xl hover:bg-emerald-100 transition-colors shadow-sm" 
           onClick={startStandup}
         >
-          Add Another Update
+          View Today's Update
         </button>
       </div>
     ) : (

@@ -163,11 +163,10 @@ export default function PulsePage() {
     if (activeCtx === 'home') {
       setHomeChatId(uuidv4());
       setHomeMsgs([]);
+      navTo('home');
     } else {
-      setStandupChatId(uuidv4());
-      setStandupMsgs([]);
+      startStandup();
     }
-    navTo('home');
   };
 
   const handleSend = () => {
@@ -198,6 +197,17 @@ export default function PulsePage() {
   };
 
   const startStandup = () => {
+    // Check if a standup session already exists for today
+    const today = new Date().toDateString();
+    const existingStandup = pastChats.find(
+      (c: any) => c.type === 'standup' && new Date(c.createdAt).toDateString() === today
+    );
+
+    if (existingStandup) {
+      loadChat(existingStandup.chatId);
+      return;
+    }
+
     const newId = uuidv4();
     setStandupChatId(newId);
     setStandupMsgs([]);
@@ -218,6 +228,10 @@ export default function PulsePage() {
   if (activeView === 'integrations') title = 'Integrations';
   if (activeView === 'settings') title = 'Settings';
   if (activeView === 'standup-chat') title = 'Daily Standup — Live';
+  
+  const isStandupDoneToday = pastChats.some(
+    (c: any) => c.type === 'standup' && new Date(c.createdAt).toDateString() === new Date().toDateString()
+  );
 
   return (
     <div className="pulse-container font-sans text-[#111] bg-[#f7f8fa] w-full h-screen overflow-hidden flex">
@@ -253,7 +267,14 @@ export default function PulsePage() {
 
         <div className="varea" onClick={() => setModelDropdownOpen(false)}>
            <div className={`view ${activeView === 'home' ? 'active' : ''} ${showHomeChat && activeView === 'home' ? 'flex flex-col' : ''}`}>
-             {!showHomeChat && <HomeView fillAndSend={fillAndSend} user={TEST_USER} startStandup={startStandup} />}
+             {!showHomeChat && (
+               <HomeView 
+                 fillAndSend={fillAndSend} 
+                 user={TEST_USER} 
+                 startStandup={startStandup} 
+                 isStandupDoneToday={isStandupDoneToday} 
+               />
+             )}
              {showHomeChat && (
                 <MessagesList 
                   messages={homeMsgs} 
