@@ -50,6 +50,18 @@ export const HomeView = ({ fillAndSend, user, startStandup }: any) => (
 );
 
 export const StandupHistoryLayout = ({ startStandup, pastStandups, loadChat }: any) => {
+  const [standupData, setStandupData] = React.useState<Record<string, any>>({});
+
+  // Fetch real standup records to enrich the history cards
+  React.useEffect(() => {
+    const ids = (pastStandups || []).map((s: any) => s.chatId).filter(Boolean);
+    if (ids.length === 0) return;
+    fetch(`/api/standups/history?chatIds=${ids.join(',')}`)
+      .then(r => r.json())
+      .then(d => { if (d.success) setStandupData(d.data || {}); })
+      .catch(() => {}); // Graceful degradation
+  }, [pastStandups]);
+
   const isStandupDoneToday = pastStandups?.some(
     (s: any) => new Date(s.createdAt).toDateString() === new Date().toDateString()
   );
@@ -100,16 +112,25 @@ export const StandupHistoryLayout = ({ startStandup, pastStandups, loadChat }: a
                   <div className="shmon">{d.toLocaleString('default', { month: 'short' })}</div>
                 </div>
                 <div className="shinf">
-                  <div className="shtl">Sprint 23 · Day {d.getDate()}</div>
-                  <div className="shmt"><span>{Math.floor(Math.random() * 5) + 3} members</span><span>·</span><span>{Math.floor(Math.random() * 15) + 10} min</span><span>·</span><span>0 blockers</span></div>
+                  <div className="shtl">{s.title?.substring(0, 40) || `Standup · ${d.toLocaleDateString()}`}</div>
+                  <div className="shmt">
+                    <span>{d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                    {standupData[d.toDateString()]?.blockers && standupData[d.toDateString()].blockers !== 'None' && (
+                      <><span>·</span><span style={{color:'#dc2626'}}>⚠ Blocker</span></>
+                    )}
+                  </div>
                 </div>
                 <div className="shtags">
                   <span className="tag b">Done</span>
-                  <span className="tag g">Clean ✓</span>
+                  {standupData[d.toDateString()]?.blockers && standupData[d.toDateString()].blockers !== 'None'
+                    ? <span className="tag" style={{background:'#fef2f2',color:'#991b1b'}}>Has Blockers</span>
+                    : <span className="tag g">Clean ✓</span>}
                 </div>
               </div>
               <div className="shbdy">
-                This daily team aggregate will populate from asynchronous updates automatically in the next update.
+                {standupData[d.toDateString()]?.yesterday
+                  ? <><strong>Yesterday:</strong> {standupData[d.toDateString()].yesterday}<br/><strong>Today:</strong> {standupData[d.toDateString()].today}</>
+                  : <span style={{color:'#94a3b8', fontSize:12, fontStyle:'italic'}}>Chat completed — summary loading...</span>}
               </div>
               <div className="shact">
                 <button className="sha p" onClick={() => loadChat?.(s.chatId)}>Open your chat</button>

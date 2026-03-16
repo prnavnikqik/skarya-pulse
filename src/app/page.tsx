@@ -123,7 +123,7 @@ export default function PulsePage() {
     id: 'home',
     api: '/api/chat',
     body: { ...TEST_USER, modelId: selectedModel.id, chatId: homeChatId, chatType: 'chat' },
-    maxSteps: 7,
+    maxSteps: 10,
     onFinish: () => {
       loadChatHistory();
     }
@@ -133,7 +133,7 @@ export default function PulsePage() {
     id: 'standup',
     api: '/api/chat',
     body: { ...TEST_USER, modelId: selectedModel.id, chatId: standupChatId, chatType: 'standup' },
-    maxSteps: 7,
+    maxSteps: 10,
     onFinish: () => {
       loadChatHistory();
     }
@@ -186,27 +186,27 @@ export default function PulsePage() {
 
   const fillAndSend = (txt: string) => {
     setInput('');
-    setActiveCtx('home');
-    navTo('home');
-    appendHome({ role: 'user', content: txt });
+    if (activeCtx === 'standup') {
+      // Route to standup context if already in a standup session
+      navTo('standup-chat');
+      appendStandup({ role: 'user', content: txt });
+    } else {
+      setActiveCtx('home');
+      navTo('home');
+      appendHome({ role: 'user', content: txt });
+    }
   };
 
   const startStandup = () => {
-    setStandupChatId(uuidv4());
-    setStandupMsgs([
-      {
-        id: uuidv4(),
-        role: 'user',
-        content: "Let's start my daily standup."
-      },
-      { 
-        id: uuidv4(), 
-        role: 'assistant', 
-        content: "Good morning! Let's get started with your daily standup.\n\nTo begin, **what did you accomplish yesterday?**" 
-      }
-    ]);
+    const newId = uuidv4();
+    setStandupChatId(newId);
+    setStandupMsgs([]);
     setActiveCtx('standup');
     navTo('standup-chat');
+    // Fire a real AI call — the AI reads live board data and leads the standup
+    setTimeout(() => {
+      appendStandup({ role: 'user', content: "Let's run my daily standup. Check my active tasks, overdue items, and what I promised yesterday — then guide me through it." });
+    }, 50);
   };
 
   let title = 'Pulse';

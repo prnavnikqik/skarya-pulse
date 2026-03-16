@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 
 export const Sidebar = ({ 
     isSidebarCollapsed, 
@@ -14,6 +14,16 @@ export const Sidebar = ({
 
     const [editingId, setEditingId] = useState<string | null>(null);
     const [editVal, setEditVal] = useState('');
+    const [unreadCount, setUnreadCount] = useState(0);
+
+    // Fetch real unread summary notification count from TeamStandup
+    useEffect(() => {
+      if (!user?.boardId || !user?.workspaceId) return;
+      fetch(`/api/standups/unread?boardId=${user.boardId}&workspaceId=${user.workspaceId}`)
+        .then(r => r.json())
+        .then(d => { if (d.success) setUnreadCount(d.unread || 0); })
+        .catch(() => {});
+    }, [user?.boardId, user?.workspaceId]);
 
     const handleRenameSubmit = (id: string, e: any) => {
       e.stopPropagation();
@@ -24,7 +34,6 @@ export const Sidebar = ({
       setEditingId(null);
     };
 
-    // Get initials safely from user.userName
     const getInitials = (name: string) => {
       if (!name) return 'U';
       const parts = name.split(' ');
@@ -90,7 +99,7 @@ export const Sidebar = ({
           <div className={`ni ${activeView === 'summaries' ? 'act' : ''}`} data-tip="Summaries" onClick={() => navTo('summaries')}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
             <span className="nl">Summaries</span>
-            <span className="badge bb">2 New</span>
+            {unreadCount > 0 && <span className="badge bb">{unreadCount} New</span>}
           </div>
           <div className={`ni ${activeView === 'reports' ? 'act' : ''}`} data-tip="Sprint Reports" onClick={() => navTo('reports')}>
              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
@@ -129,8 +138,6 @@ export const Sidebar = ({
                       <span className="truncate pr-8" title={chat.title}>{chat.title}</span>
                     )}
                   </div>
-                  
-                  {/* Actions - visible on hover */}
                   <div className="absolute right-2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1.5 bg-white pl-2">
                      <button 
                        onClick={(e) => { e.stopPropagation(); setEditingId(chat.chatId); setEditVal(chat.title); }}

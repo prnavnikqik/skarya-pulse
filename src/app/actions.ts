@@ -153,16 +153,27 @@ export async function executeSkaryaAction(toolName: string, args: Record<string,
       const Standup = (await import('@/models/Standup')).default;
       
       await connectToDatabase();
-      const newStandup = await Standup.create({
-        userEmail: authMeta?.userEmail || 'unknown',
-        boardId,
-        workspaceId,
-        yesterday: String(args.yesterday),
-        today: String(args.today),
-        blockers: String(args.blockers || 'None'),
-        summary: args.summary ? String(args.summary) : ''
-      });
-      return { success: true, newStandup };
+
+      // Upsert: key on user+board+today to prevent duplicates
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const upserted = await Standup.findOneAndUpdate(
+        { userEmail: authMeta?.userEmail || 'unknown', boardId, date: { $gte: today } },
+        {
+          $set: {
+            userEmail: authMeta?.userEmail || 'unknown',
+            boardId,
+            workspaceId,
+            yesterday: String(args.yesterday),
+            today: String(args.today),
+            blockers: String(args.blockers || 'None'),
+            summary: args.summary ? String(args.summary) : ''
+          }
+        },
+        { upsert: true, new: true, setDefaultsOnInsert: true }
+      );
+      return { success: true, standup: upserted };
     }
 
     // ─── DRAFT DOCUMENT ───────────────────────────────────────────────────────

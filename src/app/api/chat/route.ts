@@ -63,10 +63,11 @@ export async function POST(req: Request) {
     }
 
     // 3. Context Builder Layer
-    // We enforce a strict max budget to prevent the token limit burst
+    // Standup sessions need much longer context to maintain accountability thread
+    const isStandup = chatType === 'standup';
     const controlledMessages = buildTokenControlledContext(messages, {
-      historyLimit: 8, // Safely increased to preserve task context and wrap-up flow
-      systemPromptTokensEstimate: 300
+      historyLimit: isStandup ? 24 : 8,
+      systemPromptTokensEstimate: isStandup ? 500 : 300
     });
 
     // 4. Agent Engine Layer
