@@ -98,7 +98,7 @@ export default function PulsePage() {
     } catch (err) { console.error('Failed to rename chat', err); }
   };
 
-  const loadChat = async (id: string) => {
+  const loadChat = async (id: string, resumePrompt?: string) => {
     try {
       const res = await fetch(`/api/chats/${id}`);
       const data = await res.json();
@@ -108,6 +108,11 @@ export default function PulsePage() {
           setStandupMsgs(data.messages || []);
           setActiveCtx('standup');
           navTo('standup-chat');
+          if (resumePrompt) {
+            setTimeout(() => {
+              appendStandup({ role: 'user', content: resumePrompt });
+            }, 100);
+          }
         } else {
           setHomeChatId(id);
           setHomeMsgs(data.messages || []);
@@ -204,7 +209,7 @@ export default function PulsePage() {
     );
 
     if (existingStandup) {
-      loadChat(existingStandup.chatId);
+      loadChat(existingStandup.chatId, "I'm returning to today's standup. Please acknowledge that we already completed the main update and ask if there's anything else I'd like to share or change.");
       return;
     }
 
