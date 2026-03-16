@@ -12,15 +12,11 @@ export interface ContextConfig {
  */
 export function buildTokenControlledContext(
     allMessages: Message[],
-    config: ContextConfig = { historyLimit: 6, systemPromptTokensEstimate: 400 }
+    config: ContextConfig = { historyLimit: 8, systemPromptTokensEstimate: 400 }
 ) {
     // Always keep the very latest message (usually user), and take the last N items
     // To avoid cutting off an assistant's tool call halfway (which 'ai' strict parsing hates),
     // we could just take the last N where N is safe.
-
-    if (allMessages.length <= config.historyLimit) {
-        return allMessages;
-    }
 
     // Safely truncate history
     const trimmed = allMessages.slice(-config.historyLimit);

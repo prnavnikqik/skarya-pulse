@@ -329,13 +329,6 @@ const ChatMessage = ({ msg, TEST_USER, addToolResult, setActiveDocument, fillAnd
         </div>
       )}
 
-      {/* AI Text Content */}
-      {contentText && (
-        <div className="ai-msg-body">
-          <ReactMarkdown>{contentText}</ReactMarkdown>
-        </div>
-      )}
-
       {/* Completed Tools chip */}
       {completedTools.length > 0 && (
         <div className="tool-done-group">
@@ -343,7 +336,7 @@ const ChatMessage = ({ msg, TEST_USER, addToolResult, setActiveDocument, fillAnd
             {failedTools.length > 0
               ? <><span className="tool-chip-fail-dot" /> {failedTools.length} failed</>
               : <><span className="tool-chip-ok-dot" /> {completedTools.length} action{completedTools.length > 1 ? 's' : ''} completed</>}
-            <span className="tool-chip-arrow">{showToolDetails ? '▴' : '▾'}</span>
+            <span className="tool-chip-arrow">{showToolDetails ? '▾' : '▴'}</span>
           </button>
           {showToolDetails && (
             <div className="tool-done-details">
@@ -353,6 +346,13 @@ const ChatMessage = ({ msg, TEST_USER, addToolResult, setActiveDocument, fillAnd
               })}
             </div>
           )}
+        </div>
+      )}
+
+      {/* AI Text Content */}
+      {contentText && (
+        <div className="ai-msg-body">
+          <ReactMarkdown>{contentText}</ReactMarkdown>
         </div>
       )}
 
@@ -394,15 +394,17 @@ const ChatMessage = ({ msg, TEST_USER, addToolResult, setActiveDocument, fillAnd
 };
 
 export const MessagesList = ({ messages, TEST_USER, addToolResult, setActiveDocument, isLoading, messagesEndRef, fillAndSend }: any) => {
+  const displayMsgs = messages.filter((m: any) => m.role === 'user' || m.role === 'assistant');
+  
   let lastAiIdx = -1;
-  for (let i = messages.length - 1; i >= 0; i--) {
-    if (messages[i].role === 'assistant') { lastAiIdx = i; break; }
+  for (let i = displayMsgs.length - 1; i >= 0; i--) {
+    if (displayMsgs[i].role === 'assistant') { lastAiIdx = i; break; }
   }
 
   return (
     <div className="msgs custom-scrollbar">
       <div className="dlbl">{new Date().toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' })}</div>
-      {messages.map((m: any, idx: number) => (
+      {displayMsgs.map((m: any, idx: number) => (
         <ChatMessage
           key={m.id || idx}
           msg={m}

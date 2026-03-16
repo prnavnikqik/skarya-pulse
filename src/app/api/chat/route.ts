@@ -65,7 +65,7 @@ export async function POST(req: Request) {
     // 3. Context Builder Layer
     // We enforce a strict max budget to prevent the token limit burst
     const controlledMessages = buildTokenControlledContext(messages, {
-      historyLimit: 3, // Urgent reduction due to 12k TPM limit
+      historyLimit: 8, // Safely increased to preserve task context and wrap-up flow
       systemPromptTokensEstimate: 300
     });
 

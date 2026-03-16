@@ -194,6 +194,11 @@ export default function PulsePage() {
   const startStandup = () => {
     setStandupChatId(uuidv4());
     setStandupMsgs([
+      {
+        id: uuidv4(),
+        role: 'user',
+        content: "Let's start my daily standup."
+      },
       { 
         id: uuidv4(), 
         role: 'assistant', 
