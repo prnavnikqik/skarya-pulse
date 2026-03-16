@@ -1,6 +1,7 @@
 {
   "name": "skarya-pulse",
   "version": "0.1.1",
+  "description": "✦ Skarya Pulse: Automated AI Standup Facilitator & Sprint Intelligence.",
   "author": "prnavnikqik <pranav.patil@nikqik.com>",
   "private": true,
   "scripts": {

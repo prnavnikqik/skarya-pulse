@@ -1,4 +1,0 @@
-.next/types/app/api/chats/[id]/route.ts(49,7): error TS2344: Type '{ __tag__: "GET"; __param_position__: "second"; __param_type__: { params: { id: string; }; }; }' does not satisfy the constraint 'ParamCheck<RouteContext>'.
-  The types of '__param_type__.params' are incompatible between these types.
-    Type '{ id: string; }' is missing the following properties from type 'Promise<any>': then, catch, finally, [Symbol.toStringTag]
-src/app/pulse/PulseViews.tsx(2,27): error TS2307: Cannot find module 'react-markdown' or its corresponding type declarations.
