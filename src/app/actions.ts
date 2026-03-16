@@ -173,6 +173,30 @@ export async function executeSkaryaAction(toolName: string, args: Record<string,
         },
         { upsert: true, new: true, setDefaultsOnInsert: true }
       );
+
+      // SILENT UPDATE: Update TeamStandup metrics to trigger unread badge increment
+      try {
+        const TeamStandup = (await import('@/models/TeamStandup')).default;
+        const dateString = today.toISOString().split('T')[0];
+        await TeamStandup.findOneAndUpdate(
+          { workspaceId, boardId, dateString },
+          { 
+            $addToSet: { 
+              updates: { 
+                userEmail: authMeta?.userEmail || 'unknown',
+                userName: authMeta?.userEmail?.split('@')[0] || 'User',
+                timestamp: new Date(),
+                type: 'morning_update',
+                synopsis: args.summary ? String(args.summary) : 'Logged standup',
+                hasBlockers: String(args.blockers || 'None').toLowerCase() !== 'none'
+              }
+            },
+            $inc: { unreadNotifications: 1 }
+          },
+          { upsert: true }
+        );
+      } catch (e) { console.error('Silent TeamStandup update failed', e); }
+
       return { success: true, standup: upserted };
     }
 

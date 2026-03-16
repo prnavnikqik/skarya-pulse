@@ -18,10 +18,10 @@ export async function extractAndPersistStandup(
         await connectToDatabase();
 
         // 1. Prepare transcript for extraction
-        // We only care about the last ~10-15 messages to extract the latest status
-        const transcript = messages.slice(-15).map(m => `${m.role.toUpperCase()}: ${m.content}`).join('\n');
+        // Increase slice to 40 messages to ensure task-by-task flow is captured
+        const transcript = messages.slice(-40).map(m => `${m.role.toUpperCase()}: ${m.content}`).join('\n');
 
-        if (transcript.length < 50) return; // Not enough context to extract anything meaningful
+        if (transcript.length < 50) return; // Not enough context
 
         console.log(`[Standup-Extractor] Extracting from transcript for ${userEmail}`);
 
