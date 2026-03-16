@@ -1,4 +1,6 @@
 'use server';
+import TeamStandup from '@/models/TeamStandup';
+import connectToDatabase from '@/lib/mongoose';
 
 import { TaskReader } from '@/integrations/task-reader';
 
@@ -214,6 +216,33 @@ export async function fetchSummaries(boardId: string, workspaceId: string) {
     };
   } catch (error: any) {
     console.error("fetchSummaries error:", error);
+    return { success: false, error: error.message };
+  }
+}
+
+export async function fetchTeamSynthesis(boardId: string, workspaceId: string) {
+  try {
+    await connectToDatabase();
+    const today = new Date().toISOString().split('T')[0];
+    
+    let synthesis: any = await TeamStandup.findOne({ boardId, workspaceId, dateString: today }).lean();
+    
+    // If not found or older than 30 mins, we trigger a background synthesis (fire and forget for this request)
+    const isOutdated = synthesis && (Date.now() - new Date(synthesis.summary.lastGeneratedAt).getTime()) > 30 * 60 * 1000;
+    
+    if (!synthesis || isOutdated) {
+      console.log(`[Dashboard-Action] Triggering standup synthesis for ${boardId}`);
+      // Using fetch in background to avoid blocking
+      fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/standups/synthesize`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ boardId, workspaceId })
+      }).catch(e => console.error("Background synthesis trigger failed", e));
+    }
+
+    return { success: true, synthesis: synthesis || null };
+  } catch (error: any) {
+    console.error("fetchTeamSynthesis error:", error);
     return { success: false, error: error.message };
   }
 }

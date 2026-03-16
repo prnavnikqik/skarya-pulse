@@ -2,6 +2,7 @@ import { streamText } from 'ai';
 import { getToolsForIntent } from './tools';
 import { UserIntent } from './intent';
 import ChatSession from '@/models/ChatSession';
+import { extractAndPersistStandup } from './standup-extractor';
 
 export async function runAgentEngine(
     model: any,
@@ -54,17 +55,19 @@ FORMATTING:
 
 TOOL USAGE & MUTATIONS:
 - NEVER mention tool names (e.g., "get_board_health"). Just speak naturally about the data.
-- For task mutations (create, update, comment, subtask), ALWAYS wait for user confirmation via the UI card.
-- When suggesting subtasks, use "auto_generate_subtasks" first to get context, then offer to create them.
-- If a user mentions a blocker, proactively offer to flag it on the relevant task using "add_task_comment".
+- For task mutations (create, update, comment, prioritize, etc.), ALWAYS trigger the tool to generate a confirmation card in the UI. 
+- You have a heavy bias towards ACTION. If a user says they are blocked, update the task status and add a blocker comment immediately (triggering confirmation).
+- If a user says "I am done with X", use "update_task_status" to move it to Done.
 
-STANDUP FLOW (The "Pulse" Standard):
-1. **Contextual Start**: Briefly check 'get_past_standups'. Reference what they were doing if possible.
-2. **Phase 1 (Yesterday & Progress)**: Don't just ask "what did you do?". Instead, use 'get_active_tasks' and **walk through their assigned tasks one by one**. Ask: "How did we net out on **[Task Name]**? Is it still in progress or can we move it to Done?"
-3. **Phase 2 (Today)**: "Based on your updates, what's the priority for today?" Suggest tasks from the 'Backlog' or 'To Do' if they have capacity.
-4. **Phase 3 (Blockers)**: "Any roadblocks or things I can help clear? I can flag blockers or loop in the lead if needed."
-5. **Accountability**: You are a **mediator**, not just a note-taker. If a task is lagging, ask *why* and if a subtask or priority change is needed.
-6. **Confirmation**: Once the session is wraped, use 'persist_standup' to save the record permanently.
+SMART STANDUP FLOW (The "Pulse" Standard):
+You are NOT a passive note-taker; you are a proactive mediator. 
+1. **Knowledge Lead**: Start by fetching 'get_active_tasks' and 'get_my_overdue_tasks'. 
+2. **Phase 1 (Accountability)**: Instead of asking "what did you do?", lead with what you know. 
+   - *Example*: "I see you're still pushing on **Develop UI Components**. Any progress there, or are we hitting a wall?"
+   - Address overdue tasks first. "We missed the date on **API Integration**. What's the plan to get this across the line?"
+3. **Phase 2 (Dependencies)**: Use 'get_team_tasks' to see if others are waiting on the user, or if the user is waiting on others.
+4. **Phase 3 (Blocker Extraction)**: If the user mentions a roadblock, offer to unblock them by loop-in or priority shifts.
+5. **Phase 4 (Persistence)**: As the conversation progresses, use 'persist_standup' (even partially) to ensure no data is lost if they disconnect.
 
 PERMISSIONS:
 - You can READ info on any task or any team member.
@@ -79,7 +82,9 @@ Context: Board ${boardId} | User: ${userEmail} | Intent: ${intent}${memoryPrompt
         onFinish: async (event: any) => {
             if (!chatId || !rawMessages) return;
             try {
-                // Construct the final messages array matching AI SDK state
+                const finalMessages = [...rawMessages, ...event.response.messages];
+
+                // 1. Save Full Chat Session
                 const title = rawMessages?.length > 0 && rawMessages[0].content
                     ? (rawMessages[0].content as string).substring(0, 50) + '...'
                     : 'New Conversation';
@@ -93,14 +98,19 @@ Context: Board ${boardId} | User: ${userEmail} | Intent: ${intent}${memoryPrompt
                             boardId,
                             title,
                             type: chatType || 'chat',
-                            messages: [...rawMessages, ...event.response.messages],
+                            messages: finalMessages,
                             updatedAt: new Date()
                         }
                     },
                     { upsert: true, new: true, setDefaultsOnInsert: true }
                 );
+
+                // 2. Trigger Background Standup Extraction (Silent Persistence)
+                if (intent === 'standup_update' || chatType === 'standup') {
+                    await extractAndPersistStandup(finalMessages, userEmail, workspaceId, boardId);
+                }
             } catch (e) {
-                console.error("Failed to save chat history to DB within onFinish:", e);
+                console.error("Failed to save session or extract standup in onFinish:", e);
             }
         }
     });

@@ -421,10 +421,15 @@ export function SprintReportsView({ workspaceId, boardId, fillAndSend }: { works
 export function SummariesView({ workspaceId, boardId, fillAndSend }: { workspaceId: string, boardId: string, fillAndSend: (txt: string) => void }) {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<any>(null);
+  const [synthesis, setSynthesis] = useState<any>(null);
 
   useEffect(() => {
-    fetchSummaries(boardId, workspaceId).then(res => {
+    Promise.all([
+      fetchSummaries(boardId, workspaceId),
+      import('@/app/actions/dashboards').then(m => m.fetchTeamSynthesis(boardId, workspaceId))
+    ]).then(([res, synRes]) => {
       if (res.success) setData(res);
+      if (synRes.success) setSynthesis(synRes.synthesis);
       setLoading(false);
     });
   }, [boardId, workspaceId]);
@@ -452,6 +457,15 @@ export function SummariesView({ workspaceId, boardId, fillAndSend }: { workspace
       <div style={{background:'linear-gradient(135deg, #065f46 0%, #047857 50%, #10b981 100%)', borderRadius:20, padding:'24px 28px', margin:'20px 0', color:'#fff', position:'relative', overflow:'hidden'}}>
         <div style={{position:'absolute', top:-30, right:-30, width:150, height:150, background:'radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 70%)', borderRadius:'50%'}} />
         <div style={{fontSize:12, fontWeight:600, opacity:0.7, textTransform:'uppercase', letterSpacing:'1px', marginBottom:14}}>Today's Pulse</div>
+        
+        {synthesis?.summary?.contentHtml ? (
+          <div className="mb-8 prose prose-invert max-w-none" style={{fontSize:14, opacity:0.95}} dangerouslySetInnerHTML={{ __html: synthesis.summary.contentHtml }} />
+        ) : (
+          <div style={{fontSize:14, opacity:0.8, marginBottom:24, fontStyle:'italic'}}>
+            Gathering team check-ins... Once your team starts their standups, I'll generate a rich overview of the day's momentum here.
+          </div>
+        )}
+
         <div style={{display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:20}}>
           {[
             { label: 'Active Tasks', value: snapshot.totalActive || 0 },
