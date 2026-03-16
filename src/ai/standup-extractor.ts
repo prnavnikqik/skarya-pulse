@@ -12,7 +12,8 @@ export async function extractAndPersistStandup(
     messages: any[],
     userEmail: string,
     workspaceId: string,
-    boardId: string
+    boardId: string,
+    userName?: string
 ) {
     try {
         await connectToDatabase();

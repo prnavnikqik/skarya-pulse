@@ -52,6 +52,7 @@ export async function fetchBlockerRadar(boardId: string, workspaceId: string) {
 
 export async function fetchTeamAnalytics(boardId: string, workspaceId: string) {
   try {
+    console.log("fetchTeamAnalytics called with boardId:", boardId, "workspaceId:", workspaceId);
     const health = await TaskReader.getBoardHealth(boardId, workspaceId);
     const members = await TaskReader.getTeamMembers(boardId, workspaceId);
     const metrics = await TaskReader.getSprintMetrics(boardId, workspaceId);

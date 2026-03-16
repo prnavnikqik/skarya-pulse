@@ -263,6 +263,7 @@ export default function PulsePage() {
                   isLoading={homeStatus === 'submitted' || homeStatus === 'streaming'}
                   messagesEndRef={messagesEndRef}
                   fillAndSend={fillAndSend}
+                  chatType="home"
                 />
              )}
            </div>
@@ -284,6 +285,7 @@ export default function PulsePage() {
                   isLoading={standupStatus === 'submitted' || standupStatus === 'streaming'}
                   messagesEndRef={messagesEndRef}
                   fillAndSend={fillAndSend}
+                  chatType="standup"
                 />
            </div>
 

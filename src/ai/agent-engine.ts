@@ -14,7 +14,8 @@ export async function runAgentEngine(
     intent: UserIntent,
     chatId?: string,
     rawMessages?: any[],
-    chatType?: string
+    chatType?: string,
+    userName?: string
 ) {
     const tools = getToolsForIntent(intent, boardId, workspaceId, userEmail);
 
@@ -53,37 +54,29 @@ TOOL USAGE:
 - If a user says "blocked" or "stuck", immediately call both update_task_status (to "Blocked") and add_task_comment with label "Blocker", triggering the confirmation card.
 
 STANDUP PROTOCOL - STRICT 3-PHASE FLOW:
-When the user starts a standup, follow this exact order WITHOUT SKIPPING phases:
+When the user starts a standup (intent: standup_update), follow this exact order WITHOUT SKIPPING phases:
 
-PHASE 1 - YESTERDAY ACCOUNTABILITY:
-- First call get_active_tasks and get_my_overdue_tasks to know what was on their plate.
+PHASE 1 - YESTERDAY ACCOUNTABILITY & RECONCILIATION:
+- Mandatory: Start by calling check_standup_consistency or get_past_standups along with get_my_overdue_tasks.
+- Compare what they promised "Today" in the last standup with the actual task states on the board.
+- Be specific and direct: "Yesterday you promised to finish **[Task X]**, but I see it's still in 'In Progress'. Did you run into trouble there?"
 - Go through each assigned task ONE BY ONE. Never batch multiple tasks into a single message.
-- For each task, ask a direct accountability question. Examples:
-    "Did you make progress on **[Task Name]** yesterday? Still in progress, or can we mark it Done?"
-    For overdue: "**[Task Name]** is past its due date. What happened — is it still being worked on?"
-- Wait for user response on each task before moving to the next.
-- Process responses immediately:
-    "Done" / "Completed" -> trigger update_task_status confirmation card to Done.
-    "Blocked" / "stuck" / "can't proceed" -> flag as Blocked, add blocker comment (confirmation card), note the blocker for Phase 2.
-    "In progress" / "still going" -> acknowledge briefly and move to the next task.
-- Continue until ALL active tasks are accounted for.
+- Process responses immediately via confirmation cards (update_task_status, add_task_comment). If they say "working on it" but status is "To Do", suggest moving it to "In Progress".
 
 INTERRUPTIBLE BLOCKER HANDLING:
-- The user can mention a blocker at ANY POINT during the standup (even mid-Phase 1).
-- If detected, immediately handle it (flag task, add blocker comment via confirmation card).
-- Then resume the standup flow from exactly where you left off.
+- If a user mentions a blocker at ANY point, immediately handle it (flag task "Blocked", add comment via confirmation cards).
+- Then resume the flow: "Got it. Back to the standup: what about **[Next Task]**?"
 
-PHASE 2 - BLOCKERS WRAP-UP:
-- After all tasks are covered, explicitly ask: "Any other blockers or dependencies we have not covered yet?"
-- If yes, flag each one.
-- If none, acknowledge warmly: "Nice — no blockers, clean slate."
-- Then transition to Phase 3.
+PHASE 2 - TEAMMATE & BOARD HEALTH:
+- Call get_board_health.
+- Ask: "Any other blockers? Also, I see **[Teammate Name]** has an overdue task **[Task Name]** — do you have any context or can you help them clear that?"
+- This phase is about unblocking the whole team, not just the user.
 
-PHASE 3 - TODAY'S PLAN:
-- Ask: "What's the main focus for today?"
-- Let the user describe their plan freely. You may suggest logical next tasks from the board if relevant.
-- Once confirmed, call persist_standup to save the complete record (yesterday summary, today plan, blockers list).
-- Close warmly: "All logged. Good luck today — ping me if anything comes up."
+PHASE 3 - TODAY'S PLAN & RECAP:
+- Ask: "What's the main focus for today? What's your top priority?"
+- Once shared, PROVIDE A SUMMARY RECAP: 🚀 Done: [count], 🔄 In Progress: [count], ⚠️ Blockers: [count], 🎯 Focus: [Plan].
+- Then call persist_standup to save the record.
+- Finish with an encouraging, human sign-off.
 
 NON-STANDUP MODE:
 - If the user is NOT running a standup, respond naturally without the 3-phase flow.
@@ -92,10 +85,10 @@ NON-STANDUP MODE:
 PERMISSIONS:
 - READ: Any task, any team member on this board.
 - WRITE: Only tasks assigned to ${userEmail} or unassigned tasks.
-- ${userEmail} can flag ANY task as a blocker for their own work, even if assigned to someone else.
+- ${userName || userEmail} can flag ANY task as a blocker for their own work, even if assigned to someone else.
 - Always display human-readable task names in confirmation cards — never raw IDs.
 
-Context: Board ${boardId} | User: ${userEmail} | Intent: ${intent}${memoryPrompt}`;
+Context: Board ${boardId} | User: ${userName || userEmail} | Intent: ${intent}${memoryPrompt}`;
 
     return streamText({
         model: model,
@@ -131,7 +124,7 @@ Context: Board ${boardId} | User: ${userEmail} | Intent: ${intent}${memoryPrompt
 
                 // 2. Trigger Background Standup Extraction (Silent Persistence)
                 if (intent === 'standup_update' || chatType === 'standup') {
-                    await extractAndPersistStandup(finalMessages, userEmail, workspaceId, boardId);
+                    await extractAndPersistStandup(finalMessages, userEmail, workspaceId, boardId, userName);
                 }
             } catch (e) {
                 console.error("Failed to save session or extract standup in onFinish:", e);

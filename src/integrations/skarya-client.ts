@@ -71,7 +71,12 @@ class SkaryaClient {
     async get<T>(url: string, params?: Record<string, string>): Promise<{ success: boolean; data: T; message?: string }> {
         try {
             const qs = params ? `?${new URLSearchParams(params).toString()}` : '';
+            console.log(`[SkaryaClient GET request] ${url}${qs}`);
+            console.log(`[SkaryaClient Cookie being used]`, this.client.defaults.headers.Cookie || "No default cookie", "Process CWD:", process.cwd());
             const response = await this.client.get(`${url}${qs}`);
+            if (!response.data || !response.data.success) {
+                console.log(`[SkaryaClient GET response failed]`, response.data);
+            }
             return response.data;
         } catch (error: any) {
             console.error(`[Skarya API Error: GET ${url}]`, error.message);

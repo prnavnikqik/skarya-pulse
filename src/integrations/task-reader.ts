@@ -197,7 +197,10 @@ export class TaskReader {
      */
     static async getBoardHealth(boardId: string, workspaceId: string) {
         const response = await skaryaClient.get<any>('/api/boardTask/getBoardTask', { boardId, workspaceId });
-        if (!response.success || !response.data) throw new Error('Failed to fetch board tasks');
+        if (!response.success || !response.data) {
+            console.error("Failed response in getBoardHealth:", response);
+            throw new Error('Failed to fetch board tasks');
+        }
         const allTasks: SkaryaTask[] = Array.isArray(response.data) ? response.data : ((response.data as any)?.tasks || []);
 
         const now = new Date();

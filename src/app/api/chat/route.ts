@@ -22,7 +22,7 @@ export const maxDuration = 60;
 export async function POST(req: Request) {
   try {
     await connectToDatabase();
-    const { messages, workspaceId, boardId, userEmail, modelId, chatId, chatType } = await req.json();
+    const { messages, workspaceId, boardId, userEmail, userName, modelId, chatId, chatType } = await req.json();
 
     if (!workspaceId || !boardId || !userEmail) {
       return new Response('Missing Context', { status: 400 });
@@ -66,7 +66,7 @@ export async function POST(req: Request) {
     // Standup sessions need much longer context to maintain accountability thread
     const isStandup = chatType === 'standup';
     const controlledMessages = buildTokenControlledContext(messages, {
-      historyLimit: isStandup ? 24 : 8,
+      historyLimit: isStandup ? 32 : 8,
       systemPromptTokensEstimate: isStandup ? 500 : 300
     });
 
@@ -81,7 +81,8 @@ export async function POST(req: Request) {
       intentResult.intent,
       chatId,
       messages, // original raw messages
-      chatType
+      chatType,
+      userName
     );
 
     // 5. Stream Output
